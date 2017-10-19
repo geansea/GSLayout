@@ -24,9 +24,9 @@ class GSLayoutUtils {
             TextPaint paint,
             int start,
             int end,
-            float width,
+            float size,
             boolean vertical) {
-        int length = paint.breakText(text, start, end, true, width, null);
+        int length = paint.breakText(text, start, end, true, size, null);
         for (int pos = start; pos < Math.min(start + length + 1, end); ++pos) {
             if (isNewline(text.charAt(pos))) {
                 length = pos - start + 1;
@@ -55,17 +55,11 @@ class GSLayoutUtils {
     }
 
     boolean canGlyphCompressLeft(GSLayoutGlyph glyph) {
-        if (glyph == null || !glyph.isFullWidth()) {
-            return false;
-        }
-        return canCompressLeft(glyph.utf16Code());
+        return glyph.isFullWidth() && canCompressLeft(glyph.utf16Code());
     }
 
     boolean canGlyphCompressRight(GSLayoutGlyph glyph) {
-        if (glyph == null || !glyph.isFullWidth()) {
-            return false;
-        }
-        return canCompressRight(glyph.utf16Code());
+        return glyph.isFullWidth() && canCompressRight(glyph.utf16Code());
     }
 
     boolean canBreak(char prevCode, char code) {
@@ -88,7 +82,7 @@ class GSLayoutUtils {
             if (isAlphaDigit(code)) {
                 return false;
             }
-            if ('\'' == code || '\"' == code || '-' == code || '_' == code) {
+            if ('\'' == code || '\"' == code || '-' == code || '_' == code || '%' == code) {
                 return false;
             }
         }

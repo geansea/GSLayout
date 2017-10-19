@@ -152,31 +152,22 @@ public class GSSimpleLayout extends GSLayout {
         if (0 == start || utils.isNewline(text.charAt(start - 1))) {
             lineIndent = fontSize * indent;
         }
+        float layoutSize = vertical ? height - lineIndent : width - lineIndent;
+        float trySize = layoutSize * 1.3f;
+        ArrayList<GSLayoutGlyph> tryGlyphs = utils.glyphsForSimpleLayout(text.toString(), paint, start, text.length(), trySize, vertical);
+        compressGlyphs(tryGlyphs);
+        int breakPos = breakPosForGlyphs(tryGlyphs, layoutSize);
+        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>(tryGlyphs.subList(0, breakPos));
+        adjustEndGlyphs(glyphs);
+        PointF origin = adjustGlyphs(glyphs, layoutSize, lineIndent);
         if (vertical) {
-            return layoutVerticalLine(start, height - lineIndent, lineIndent);
+            return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
-            return layoutHorizontalLine(start, width - lineIndent, lineIndent);
+            return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
         }
     }
 
-    private GSLayoutLine layoutHorizontalLine(int start, float width, float indent) {
-        float tryWidth = width * 1.3f;
-        List<GSLayoutGlyph> glyphs = utils.glyphsForSimpleLayout(text.toString(), paint, start, text.length(), tryWidth, false);
-        compressGlyphs(glyphs);
-        int breakPos = breakPosForGlyphs(glyphs, width);
-        glyphs = glyphs.subList(0, breakPos);
-        adjustEndGlyphs(glyphs);
-        PointF origin = adjustGlyphs(glyphs, width, indent);
-        return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
-    }
-
-    private GSLayoutLine layoutVerticalLine(int start, float width, float indent) {
-        List<GSLayoutGlyph> glyphs = utils.glyphsForSimpleLayout(text.toString(), paint, start, text.length(), width, true);
-        PointF origin = adjustGlyphs(glyphs, width, indent);
-        return GSLayoutLine.createVerticalLine(text, glyphs, origin);
-    }
-
-    private void compressGlyphs(List<GSLayoutGlyph> glyphs) {
+    private void compressGlyphs(ArrayList<GSLayoutGlyph> glyphs) {
         float fontSize = paint.getTextSize();
         float move = 0;
         GSLayoutGlyph prevGlyph = null;
@@ -193,7 +184,7 @@ public class GSSimpleLayout extends GSLayout {
                     thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate;
                     move -= thisGlyph.compressLeft;
                 }
-                if (utils.canGlyphCompressRight(prevGlyph)) {
+                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
                     thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate / 2;
                     move -= thisGlyph.compressLeft;
                     prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
@@ -201,13 +192,17 @@ public class GSSimpleLayout extends GSLayout {
                 }
             }
             if (utils.canGlyphCompressRight(thisGlyph)) {
-                if (utils.canGlyphCompressRight(prevGlyph)) {
+                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
                     prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
                     move -= prevGlyph.compressRight;
                 }
             }
             // Move
-            thisGlyph.x += move;
+            if (vertical) {
+                thisGlyph.y += move;
+            } else {
+                thisGlyph.x += move;
+            }
             // Fix CRLF width
             if (utils.isNewline(code)) {
                 move -= thisGlyph.width;
@@ -217,7 +212,7 @@ public class GSSimpleLayout extends GSLayout {
         }
     }
 
-    private int breakPosForGlyphs(List<GSLayoutGlyph> glyphs, float width) {
+    private int breakPosForGlyphs(List<GSLayoutGlyph> glyphs, float size) {
         int breakPos = 0;
         int forceBreakPos = 0;
         for (int i = 1; i < glyphs.size(); ++i) {
@@ -226,14 +221,14 @@ public class GSSimpleLayout extends GSLayout {
             if (utils.canBreak(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                 breakPos = i;
             }
-            float currentWidth = thisGlyph.getUsedRect().right;
-            if (currentWidth > width) {
+            float currentSize = vertical ? thisGlyph.getUsedRect().bottom : thisGlyph.getUsedRect().right;
+            if (currentSize > size) {
                 if (utils.canGlyphCompressRight(thisGlyph)) {
                     float compressRight = thisGlyph.width * punctuationCompressRate;
-                    currentWidth = thisGlyph.getRect().right - compressRight;
+                    currentSize = (vertical ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
                 }
             }
-            if (currentWidth > width) {
+            if (currentSize > size) {
                 forceBreakPos = i;
                 break;
             }

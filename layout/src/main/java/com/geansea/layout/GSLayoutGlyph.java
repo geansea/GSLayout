@@ -40,6 +40,8 @@ public class GSLayoutGlyph {
     public RectF getUsedRect() {
         if (rotateForVertical) {
             return new RectF(x - descent, y + compressLeft, x + ascent, y + width - compressRight);
+        } else if (vertical) {
+            return new RectF(x, y - ascent + compressLeft, x + width, y + descent - compressRight);
         } else {
             return new RectF(x + compressLeft, y - ascent, x + width - compressRight, y + descent);
         }
