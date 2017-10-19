@@ -193,7 +193,7 @@ public class GSSimpleLayout extends GSLayout {
                     thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate;
                     move -= thisGlyph.compressLeft;
                 }
-                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
+                if (utils.canGlyphCompressRight(prevGlyph)) {
                     thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate / 2;
                     move -= thisGlyph.compressLeft;
                     prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
@@ -201,7 +201,7 @@ public class GSSimpleLayout extends GSLayout {
                 }
             }
             if (utils.canGlyphCompressRight(thisGlyph)) {
-                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
+                if (utils.canGlyphCompressRight(prevGlyph)) {
                     prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
                     move -= prevGlyph.compressRight;
                 }

@@ -15,6 +15,7 @@ public class GSLayoutGlyph {
     float width;
     float compressLeft;
     float compressRight;
+    boolean vertical;
     boolean rotateForVertical;
 
     GSLayoutGlyph() {

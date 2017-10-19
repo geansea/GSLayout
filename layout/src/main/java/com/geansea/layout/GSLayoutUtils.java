@@ -40,88 +40,6 @@ class GSLayoutUtils {
         }
     }
 
-    private ArrayList<GSLayoutGlyph> glyphsForSimpleHorizontalLayout(
-            String text,
-            TextPaint paint,
-            int start,
-            int length) {
-        float x = 0;
-        float ascent = -paint.ascent();
-        float descent = paint.descent();
-        float widths[] = new float[length];
-        paint.getTextWidths(text, start, start + length, widths);
-        ArrayList<GSLayoutGlyph> glyphs = new ArrayList<>(length);
-        GSLayoutGlyph glyph = null;
-        for (int i = 0; i < length; ++i) {
-            float glyphWidth = widths[i];
-            if (glyphWidth == 0 && glyph != null) {
-                glyph.end++;
-                glyph.text = text.substring(glyph.start, glyph.end);
-            } else {
-                glyph = new GSLayoutGlyph();
-                glyph.start = start + i;
-                glyph.end = glyph.start + 1;
-                glyph.text = text.substring(glyph.start, glyph.end);
-                glyph.paint = paint;
-                glyph.x = x;
-                glyph.y = 0;
-                glyph.ascent = ascent;
-                glyph.descent = descent;
-                glyph.width = glyphWidth;
-                glyphs.add(glyph);
-            }
-            x += glyphWidth;
-        }
-        return glyphs;
-    }
-
-    private ArrayList<GSLayoutGlyph> glyphsForSimpleVerticalLayout(
-            String text,
-            TextPaint paint,
-            int start,
-            int length) {
-        float y = 0;
-        float ascent = -paint.ascent();
-        float descent = paint.descent();
-        float widths[] = new float[length];
-        paint.getTextWidths(text, start, start + length, widths);
-        ArrayList<GSLayoutGlyph> glyphs = new ArrayList<>(length);
-        GSLayoutGlyph glyph = null;
-        for (int i = 0; i < length; ++i) {
-            float glyphWidth = widths[i];
-            if (glyphWidth == 0 && glyph != null) {
-                glyph.end++;
-                glyph.text = text.substring(glyph.start, glyph.end);
-            } else {
-                glyph = new GSLayoutGlyph();
-                glyph.start = start + i;
-                glyph.end = glyph.start + 1;
-                glyph.text = replaceForVertical(text.substring(glyph.start, glyph.end));
-                glyph.paint = paint;
-                if (shouldRotateForVertical(glyph.utf16Code())) {
-                    glyph.x = (descent - ascent) / 2;
-                    glyph.y = y;
-                    glyph.ascent = ascent;
-                    glyph.descent = descent;
-                    glyph.width = glyphWidth;
-                    glyph.rotateForVertical = true;
-                } else {
-                    float ascentForVertical = ascent * glyphWidth / (ascent + descent);
-                    float descentForVertical = descent * glyphWidth / (ascent + descent);
-                    glyph.x = -glyphWidth / 2;
-                    glyph.y = y + ascentForVertical;
-                    glyph.ascent = ascentForVertical;
-                    glyph.descent = descentForVertical;
-                    glyph.width = glyphWidth;
-                    glyphWidth = ascentForVertical + descentForVertical;
-                }
-                glyphs.add(glyph);
-            }
-            y += glyphWidth;
-        }
-        return glyphs;
-    }
-
     boolean isNewline(char code) {
         return ('\r' == code || '\n' == code);
     }
@@ -137,14 +55,14 @@ class GSLayoutUtils {
     }
 
     boolean canGlyphCompressLeft(GSLayoutGlyph glyph) {
-        if (glyph.width < glyph.paint.getTextSize() * 0.9) {
+        if (glyph == null || !glyph.isFullWidth()) {
             return false;
         }
         return canCompressLeft(glyph.utf16Code());
     }
 
     boolean canGlyphCompressRight(GSLayoutGlyph glyph) {
-        if (glyph.width < glyph.paint.getTextSize() * 0.9) {
+        if (glyph == null || !glyph.isFullWidth()) {
             return false;
         }
         return canCompressRight(glyph.utf16Code());
@@ -205,6 +123,91 @@ class GSLayoutUtils {
         return true;
     }
 
+    private ArrayList<GSLayoutGlyph> glyphsForSimpleHorizontalLayout(
+            String text,
+            TextPaint paint,
+            int start,
+            int length) {
+        float x = 0;
+        float ascent = -paint.ascent();
+        float descent = paint.descent();
+        float widths[] = new float[length];
+        paint.getTextWidths(text, start, start + length, widths);
+        ArrayList<GSLayoutGlyph> glyphs = new ArrayList<>(length);
+        GSLayoutGlyph glyph = null;
+        for (int i = 0; i < length; ++i) {
+            float glyphWidth = widths[i];
+            if (glyphWidth == 0 && glyph != null) {
+                glyph.end++;
+                glyph.text = text.substring(glyph.start, glyph.end);
+            } else {
+                glyph = new GSLayoutGlyph();
+                glyph.start = start + i;
+                glyph.end = glyph.start + 1;
+                glyph.text = text.substring(glyph.start, glyph.end);
+                glyph.paint = paint;
+                glyph.x = x;
+                glyph.y = 0;
+                glyph.ascent = ascent;
+                glyph.descent = descent;
+                glyph.width = glyphWidth;
+                glyphs.add(glyph);
+            }
+            x += glyphWidth;
+        }
+        return glyphs;
+    }
+
+    private ArrayList<GSLayoutGlyph> glyphsForSimpleVerticalLayout(
+            String text,
+            TextPaint paint,
+            int start,
+            int length) {
+        text = replaceTextForVertical(text);
+        float y = 0;
+        float ascent = -paint.ascent();
+        float descent = paint.descent();
+        float widths[] = new float[length];
+        paint.getTextWidths(text, start, start + length, widths);
+        ArrayList<GSLayoutGlyph> glyphs = new ArrayList<>(length);
+        GSLayoutGlyph glyph = null;
+        for (int i = 0; i < length; ++i) {
+            float glyphSize = widths[i];
+            if (glyphSize == 0 && glyph != null) {
+                glyph.end++;
+                glyph.text = text.substring(glyph.start, glyph.end);
+            } else {
+                glyph = new GSLayoutGlyph();
+                glyph.start = start + i;
+                glyph.end = glyph.start + 1;
+                glyph.text = text.substring(glyph.start, glyph.end);
+                glyph.paint = paint;
+                if (shouldRotateForVertical(glyph.utf16Code())) {
+                    glyph.x = (descent - ascent) / 2;
+                    glyph.y = y;
+                    glyph.ascent = ascent;
+                    glyph.descent = descent;
+                    glyph.width = glyphSize;
+                    glyph.vertical = true;
+                    glyph.rotateForVertical = true;
+                } else {
+                    float ascentForVertical = ascent * glyphSize / (ascent + descent);
+                    float descentForVertical = descent * glyphSize / (ascent + descent);
+                    glyph.x = -glyphSize / 2;
+                    glyph.y = y + ascentForVertical;
+                    glyph.ascent = ascentForVertical;
+                    glyph.descent = descentForVertical;
+                    glyph.width = glyphSize;
+                    glyph.vertical = true;
+                    glyphSize = ascentForVertical + descentForVertical;
+                }
+                glyphs.add(glyph);
+            }
+            y += glyphSize;
+        }
+        return glyphs;
+    }
+
     private boolean isAlphaDigit(char code) {
         return ('a' <= code && code <= 'z') || ('A' <= code && code <= 'Z') || ('0' <= code && code <= '9');
     }
@@ -254,6 +257,10 @@ class GSLayoutUtils {
             compressRightSet.add('\uFF1F'); // ？
             compressRightSet.add('\uFF3D'); // ］
             compressRightSet.add('\uFF5D'); // ｝
+            // For vertical
+            compressRightSet.add('\uFE10'); // ，
+            compressRightSet.add('\uFE11'); // 、
+            compressRightSet.add('\uFE12'); // 。
         }
         return compressRightSet.contains(code);
     }
@@ -324,10 +331,7 @@ class GSLayoutUtils {
         return rotateForVerticalSet.contains(code);
     }
 
-    private String replaceForVertical(String text) {
-        if (text.length() > 1) {
-            return text;
-        }
+    private char replaceForVertical(char code) {
         if (replaceForVerticalMap == null) {
             replaceForVerticalMap = new HashMap<>();
             replaceForVerticalMap.put('\uFF0C', '\uFE10'); // ，
@@ -340,8 +344,23 @@ class GSLayoutUtils {
             //replaceForVerticalMap.put('\u3016', '\uFE17'); // 〖
             //replaceForVerticalMap.put('\u3017', '\uFE18'); // 〗
             //replaceForVerticalMap.put('\u2026', '\uFE19'); // …
+            // For quotes
+            replaceForVerticalMap.put('\u2018', '\u300C'); // ‘
+            replaceForVerticalMap.put('\u2019', '\u300D'); // ’
+            replaceForVerticalMap.put('\u201C', '\u300E'); // “
+            replaceForVerticalMap.put('\u201D', '\u300F'); // ”
         }
-        Character value = replaceForVerticalMap.get(text.charAt(0));
-        return (value != null ? String.valueOf(value) : text);
+        Character value = replaceForVerticalMap.get(code);
+        return (value != null ? value : code);
+    }
+
+    private String replaceTextForVertical(String text) {
+        StringBuilder textBuilder = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); ++i) {
+            char code = text.charAt(i);
+            code = replaceForVertical(code);
+            textBuilder.append(code);
+        }
+        return textBuilder.toString();
     }
 }
