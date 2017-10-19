@@ -189,8 +189,8 @@ class GSLayoutUtils {
                     glyph.rotateForVertical = true;
                 } else {
                     float extended = ascent + descent - glyphSize;
-                    float ascentForVertical = ascent - extended / 2;
-                    float descentForVertical = descent - extended / 2;
+                    float ascentForVertical = ascent - extended / 3;
+                    float descentForVertical = descent - extended * 2 / 3;
                     glyph.x = -glyphSize / 2;
                     glyph.y = y + ascentForVertical;
                     glyph.ascent = ascentForVertical;

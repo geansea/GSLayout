@@ -49,7 +49,7 @@ public class GSTextView extends View {
         if (text != null) {
             GSSimpleLayout.Builder builder = GSSimpleLayout.Builder.obtain(text, paint)
                     .setIndent(2)
-                    .setPuncCompressRate(0.5f)
+                    .setPuncCompressRate(0.38f)
                     .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                     .setLineSpacing(0.2f)
                     .setParagraphSpacing(0.4f);
