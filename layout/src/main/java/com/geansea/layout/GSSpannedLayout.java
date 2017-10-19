@@ -1,10 +1,11 @@
 package com.geansea.layout;
 
 import android.graphics.Canvas;
+import android.text.Spanned;
 
 public class GSSpannedLayout extends GSLayout {
-    protected GSSpannedLayout() {
-        super();
+    protected GSSpannedLayout(Spanned text) {
+        super(text);
     }
 
     @Override

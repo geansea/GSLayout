@@ -75,10 +75,11 @@ public abstract class GSLayout {
         ALIGN_JUSTIFY,
     }
 
-    GSLayout() {
+    GSLayout(CharSequence text) {
+        this.text = text;
     }
 
-    protected CharSequence text;
+    private CharSequence text;
     protected int start;
     protected int end;
     protected TextPaint paint;

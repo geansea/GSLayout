@@ -54,8 +54,7 @@ public class GSSimpleLayout extends GSLayout {
         }
 
         public GSSimpleLayout build(int start, int width, int height, boolean vertical) {
-            GSSimpleLayout layout = new GSSimpleLayout();
-            layout.text = text;
+            GSSimpleLayout layout = new GSSimpleLayout(text);
             layout.paint = paint;
             layout.start = start;
             layout.end = start;
@@ -74,7 +73,8 @@ public class GSSimpleLayout extends GSLayout {
 
     private GSLayoutUtils utils;
 
-    private GSSimpleLayout() {
+    private GSSimpleLayout(String text) {
+        super(text);
         utils = new GSLayoutUtils();
     }
 
@@ -92,7 +92,7 @@ public class GSSimpleLayout extends GSLayout {
         int lineLocation = start;
         float maxWidth = 0;
         float lineTop = 0;
-        while (lineLocation < text.length()) {
+        while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
             line.origin.y = lineTop + line.ascent;
             lineTop = line.origin.y + line.descent;
@@ -122,7 +122,7 @@ public class GSSimpleLayout extends GSLayout {
         int lineLocation = start;
         float maxHeight = 0;
         float lineRight = width;
-        while (lineLocation < text.length()) {
+        while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
             line.origin.x = lineRight - line.ascent;
             lineRight = line.origin.x - line.descent;
@@ -147,6 +147,7 @@ public class GSSimpleLayout extends GSLayout {
     }
 
     private GSLayoutLine layoutLine(int start) {
+        CharSequence text = getText();
         float fontSize = paint.getTextSize();
         float lineIndent = 0;
         if (0 == start || utils.isNewline(text.charAt(start - 1))) {
