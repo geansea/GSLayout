@@ -51,6 +51,9 @@ class GSLayoutUtils {
         if (isCjk(prevCode) && isAlphaDigit(code)) {
             return true;
         }
+        if ('%' == prevCode && isCjk(code)) {
+            return true;
+        }
         return false;
     }
 
@@ -185,8 +188,9 @@ class GSLayoutUtils {
                     glyph.vertical = true;
                     glyph.rotateForVertical = true;
                 } else {
-                    float ascentForVertical = ascent * glyphSize / (ascent + descent);
-                    float descentForVertical = descent * glyphSize / (ascent + descent);
+                    float extended = ascent + descent - glyphSize;
+                    float ascentForVertical = ascent - extended / 2;
+                    float descentForVertical = descent - extended / 2;
                     glyph.x = -glyphSize / 2;
                     glyph.y = y + ascentForVertical;
                     glyph.ascent = ascentForVertical;
