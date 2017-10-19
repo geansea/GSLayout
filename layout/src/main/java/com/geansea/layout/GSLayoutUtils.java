@@ -3,18 +3,17 @@ package com.geansea.layout;
 import android.text.TextPaint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 class GSLayoutUtils {
-    private Set<Character> compressLeftSet = null;
-    private Set<Character> compressRightSet = null;
-    private Set<Character> notLineBeginSet = null;
-    private Set<Character> notLineEndSet = null;
-    private Set<Character> rotateForVerticalSet = null;
-    private Map<Character, Character> replaceForVerticalMap = null;
+    private HashSet<Character> compressLeftSet = null;
+    private HashSet<Character> compressRightSet = null;
+    private HashSet<Character> notLineBeginSet = null;
+    private HashSet<Character> notLineEndSet = null;
+    private HashSet<Character> rotateForVerticalSet = null;
+    private HashMap<Character, Character> replaceForVerticalMap = null;
 
     GSLayoutUtils() {
     }
@@ -74,11 +73,11 @@ class GSLayoutUtils {
             return true;
         }
         // false Break SPace
-        if (0xA0 == prevCode) {
+        if ('\u00A0' == prevCode) {
             return false;
         }
         // Space follow prev
-        if (' ' == code || 0xA0 == code) {
+        if (' ' == code || '\u00A0' == code) {
             return false;
         }
         if (isAlphaDigit(prevCode)) {
@@ -94,10 +93,10 @@ class GSLayoutUtils {
                 return false;
             }
         }
-        if (cannotLineBegin(code)) {
+        if (cannotLineEnd(prevCode)) {
             return false;
         }
-        if (cannotLineEnd(prevCode)) {
+        if (cannotLineBegin(code)) {
             return false;
         }
         return true;
@@ -216,49 +215,53 @@ class GSLayoutUtils {
 
     private boolean canCompressLeft(char code) {
         if (compressLeftSet == null) {
-            compressLeftSet = new HashSet<>();
-            compressLeftSet.add('\u2018'); // ‘
-            compressLeftSet.add('\u201C'); // “
-            compressLeftSet.add('\u3008'); // 〈
-            compressLeftSet.add('\u300A'); // 《
-            compressLeftSet.add('\u300C'); // 「
-            compressLeftSet.add('\u300E'); // 『
-            compressLeftSet.add('\u3010'); // 【
-            compressLeftSet.add('\u3014'); // 〔
-            compressLeftSet.add('\u3016'); // 〖
-            compressLeftSet.add('\uFF08'); // （
-            compressLeftSet.add('\uFF3B'); // ［
-            compressLeftSet.add('\uFF5B'); // ｛
+            Character[] array = new Character[]{
+                    '\u2018', // ‘
+                    '\u201C', // “
+                    '\u3008', // 〈
+                    '\u300A', // 《
+                    '\u300C', // 「
+                    '\u300E', // 『
+                    '\u3010', // 【
+                    '\u3014', // 〔
+                    '\u3016', // 〖
+                    '\uFF08', // （
+                    '\uFF3B', // ［
+                    '\uFF5B', // ｛
+            };
+            compressLeftSet = new HashSet<>(Arrays.asList(array));
         }
         return compressLeftSet.contains(code);
     }
 
     private boolean canCompressRight(char code) {
         if (compressRightSet == null) {
-            compressRightSet = new HashSet<>();
-            compressRightSet.add('\u2019'); // ’
-            compressRightSet.add('\u201D'); // ”
-            compressRightSet.add('\u3001'); // 、
-            compressRightSet.add('\u3002'); // 。
-            compressRightSet.add('\u3009'); // 〉
-            compressRightSet.add('\u300B'); // 》
-            compressRightSet.add('\u300D'); // 」
-            compressRightSet.add('\u300F'); // 』
-            compressRightSet.add('\u3011'); // 】
-            compressRightSet.add('\u3015'); // 〕
-            compressRightSet.add('\u3017'); // 〗
-            compressRightSet.add('\uFF01'); // ！
-            compressRightSet.add('\uFF09'); // ）
-            compressRightSet.add('\uFF0C'); // ，
-            compressRightSet.add('\uFF1A'); // ：
-            compressRightSet.add('\uFF1B'); // ；
-            compressRightSet.add('\uFF1F'); // ？
-            compressRightSet.add('\uFF3D'); // ］
-            compressRightSet.add('\uFF5D'); // ｝
-            // For vertical
-            compressRightSet.add('\uFE10'); // ，
-            compressRightSet.add('\uFE11'); // 、
-            compressRightSet.add('\uFE12'); // 。
+            Character[] array = new Character[]{
+                    '\u2019', // ’
+                    '\u201D', // ”
+                    '\u3001', // 、
+                    '\u3002', // 。
+                    '\u3009', // 〉
+                    '\u300B', // 》
+                    '\u300D', // 」
+                    '\u300F', // 』
+                    '\u3011', // 】
+                    '\u3015', // 〕
+                    '\u3017', // 〗
+                    '\uFF01', // ！
+                    '\uFF09', // ）
+                    '\uFF0C', // ，
+                    '\uFF1A', // ：
+                    '\uFF1B', // ；
+                    '\uFF1F', // ？
+                    '\uFF3D', // ］
+                    '\uFF5D', // ｝
+                    // For vertical
+                    '\uFE10', // ，
+                    '\uFE11', // 、
+                    '\uFE12', // 。
+            };
+            compressRightSet = new HashSet<>(Arrays.asList(array));
         }
         return compressRightSet.contains(code);
     }
@@ -268,17 +271,19 @@ class GSLayoutUtils {
             return true;
         }
         if (notLineBeginSet == null) {
-            notLineBeginSet = new HashSet<>();
-            notLineBeginSet.add('!');
-            notLineBeginSet.add(')');
-            notLineBeginSet.add(',');
-            notLineBeginSet.add('.');
-            notLineBeginSet.add(':');
-            notLineBeginSet.add(';');
-            notLineBeginSet.add('>');
-            notLineBeginSet.add('?');
-            notLineBeginSet.add(']');
-            notLineBeginSet.add('}');
+            Character[] array = new Character[]{
+                    '!',
+                    ')',
+                    ',',
+                    '.',
+                    ':',
+                    ';',
+                    '>',
+                    '?',
+                    ']',
+                    '}',
+            };
+            notLineBeginSet = new HashSet<>(Arrays.asList(array));
         }
         return notLineBeginSet.contains(code);
     }
@@ -288,11 +293,13 @@ class GSLayoutUtils {
             return true;
         }
         if (notLineEndSet == null) {
-            notLineEndSet = new HashSet<>();
-            notLineEndSet.add('(');
-            notLineEndSet.add('<');
-            notLineEndSet.add('[');
-            notLineEndSet.add('{');
+            Character[] array = new Character[]{
+                    '(',
+                    '<',
+                    '[',
+                    '{',
+            };
+            notLineEndSet = new HashSet<>(Arrays.asList(array));
         }
         return notLineEndSet.contains(code);
     }
@@ -302,51 +309,54 @@ class GSLayoutUtils {
             return true;
         }
         if (rotateForVerticalSet == null) {
-            rotateForVerticalSet = new HashSet<>();
-            rotateForVerticalSet.add('\u2014'); // —
-            rotateForVerticalSet.add('\u2026'); // …
-            rotateForVerticalSet.add('\u3008'); // 〈
-            rotateForVerticalSet.add('\u3009'); // 〉
-            rotateForVerticalSet.add('\u300A'); // 《
-            rotateForVerticalSet.add('\u300B'); // 》
-            rotateForVerticalSet.add('\u300C'); // 「
-            rotateForVerticalSet.add('\u300D'); // 」
-            rotateForVerticalSet.add('\u300E'); // 『
-            rotateForVerticalSet.add('\u300F'); // 』
-            rotateForVerticalSet.add('\u3010'); // 【
-            rotateForVerticalSet.add('\u3011'); // 】
-            rotateForVerticalSet.add('\u3014'); // 〔
-            rotateForVerticalSet.add('\u3015'); // 〕
-            rotateForVerticalSet.add('\u3016'); // 〖
-            rotateForVerticalSet.add('\u3017'); // 〗
-            rotateForVerticalSet.add('\uFF08'); // （
-            rotateForVerticalSet.add('\uFF09'); // ）
-            rotateForVerticalSet.add('\uFF3B'); // ［
-            rotateForVerticalSet.add('\uFF3D'); // ］
-            rotateForVerticalSet.add('\uFF5B'); // ｛
-            rotateForVerticalSet.add('\uFF5D'); // ｝
+            Character[] array = new Character[]{
+                    '\u2014', // —
+                    '\u2026', // …
+                    '\u3008', // 〈
+                    '\u3009', // 〉
+                    '\u300A', // 《
+                    '\u300B', // 》
+                    '\u300C', // 「
+                    '\u300D', // 」
+                    '\u300E', // 『
+                    '\u300F', // 』
+                    '\u3010', // 【
+                    '\u3011', // 】
+                    '\u3014', // 〔
+                    '\u3015', // 〕
+                    '\u3016', // 〖
+                    '\u3017', // 〗
+                    '\uFF08', // （
+                    '\uFF09', // ）
+                    '\uFF3B', // ［
+                    '\uFF3D', // ］
+                    '\uFF5B', // ｛
+                    '\uFF5D', // ｝
+            };
+            rotateForVerticalSet = new HashSet<>(Arrays.asList(array));
         }
         return rotateForVerticalSet.contains(code);
     }
 
     private char replaceForVertical(char code) {
         if (replaceForVerticalMap == null) {
-            replaceForVerticalMap = new HashMap<>();
-            replaceForVerticalMap.put('\uFF0C', '\uFE10'); // ，
-            replaceForVerticalMap.put('\u3001', '\uFE11'); // 、
-            replaceForVerticalMap.put('\u3002', '\uFE12'); // 。
-            replaceForVerticalMap.put('\uFF1A', '\uFE13'); // ：
-            replaceForVerticalMap.put('\uFF1B', '\uFE14'); // ；
-            replaceForVerticalMap.put('\uFF01', '\uFE15'); // ！
-            replaceForVerticalMap.put('\uFF1F', '\uFE16'); // ？
-            //replaceForVerticalMap.put('\u3016', '\uFE17'); // 〖
-            //replaceForVerticalMap.put('\u3017', '\uFE18'); // 〗
-            //replaceForVerticalMap.put('\u2026', '\uFE19'); // …
-            // For quotes
-            replaceForVerticalMap.put('\u2018', '\u300C'); // ‘
-            replaceForVerticalMap.put('\u2019', '\u300D'); // ’
-            replaceForVerticalMap.put('\u201C', '\u300E'); // “
-            replaceForVerticalMap.put('\u201D', '\u300F'); // ”
+            replaceForVerticalMap = new HashMap<Character, Character>() {{
+                put('\uFF0C', '\uFE10'); // ，
+                put('\u3001', '\uFE11'); // 、
+                put('\u3002', '\uFE12'); // 。
+                put('\uFF1A', '\uFE13'); // ：
+                put('\uFF1B', '\uFE14'); // ；
+                put('\uFF01', '\uFE15'); // ！
+                put('\uFF1F', '\uFE16'); // ？
+                //put('\u3016', '\uFE17'); // 〖
+                //put('\u3017', '\uFE18'); // 〗
+                //put('\u2026', '\uFE19'); // …
+                // For quotes
+                put('\u2018', '\u300C'); // ‘
+                put('\u2019', '\u300D'); // ’
+                put('\u201C', '\u300E'); // “
+                put('\u201D', '\u300F'); // ”
+            }};
         }
         Character value = replaceForVerticalMap.get(code);
         return (value != null ? value : code);
