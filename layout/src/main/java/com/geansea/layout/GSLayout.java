@@ -19,6 +19,10 @@ public abstract class GSLayout {
         return end;
     }
 
+    public TextPaint getPaint() {
+        return paint;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -75,21 +79,43 @@ public abstract class GSLayout {
         ALIGN_JUSTIFY,
     }
 
-    GSLayout(CharSequence text) {
+    GSLayout(CharSequence text,
+             int start,
+             int end,
+             TextPaint paint,
+             int width,
+             int height) {
         this.text = text;
+        this.start = start;
+        this.end = end;
+        this.paint = paint;
+        this.width = width;
+        this.height = height;
+    }
+
+    void setEnd(int end) {
+        this.end = end;
+    }
+
+    void setUsedWidth(float usedWidth) {
+        this.usedWidth = usedWidth;
+    }
+
+    void setUsedHeight(float usedHeight) {
+        this.usedHeight = usedHeight;
     }
 
     private CharSequence text;
-    protected int start;
-    protected int end;
-    protected TextPaint paint;
-    protected int width;
-    protected int height;
-    protected float usedWidth;
-    protected float usedHeight;
+    private int start;
+    private int end;
+    private TextPaint paint;
+    private int width;
+    private int height;
+    private float usedWidth;
+    private float usedHeight;
     protected float indent;
     protected float punctuationCompressRate;
-    protected Alignment alignment = Alignment.ALIGN_NORMAL;
+    protected Alignment alignment;
     protected float lineSpacing;
     protected float paragraphSpacing;
     protected boolean vertical;
