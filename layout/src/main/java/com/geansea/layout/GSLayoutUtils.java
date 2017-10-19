@@ -3,7 +3,9 @@ package com.geansea.layout;
 import android.text.TextPaint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 class GSLayoutUtils {
@@ -11,7 +13,8 @@ class GSLayoutUtils {
     private Set<Character> compressRightSet = null;
     private Set<Character> notLineBeginSet = null;
     private Set<Character> notLineEndSet = null;
-    private Set<Character> rotateForVertical = null;
+    private Set<Character> rotateForVerticalSet = null;
+    private Map<Character, Character> replaceForVerticalMap = null;
 
     GSLayoutUtils() {
     }
@@ -37,7 +40,7 @@ class GSLayoutUtils {
         }
     }
 
-    ArrayList<GSLayoutGlyph> glyphsForSimpleHorizontalLayout(
+    private ArrayList<GSLayoutGlyph> glyphsForSimpleHorizontalLayout(
             String text,
             TextPaint paint,
             int start,
@@ -72,7 +75,7 @@ class GSLayoutUtils {
         return glyphs;
     }
 
-    ArrayList<GSLayoutGlyph> glyphsForSimpleVerticalLayout(
+    private ArrayList<GSLayoutGlyph> glyphsForSimpleVerticalLayout(
             String text,
             TextPaint paint,
             int start,
@@ -93,7 +96,7 @@ class GSLayoutUtils {
                 glyph = new GSLayoutGlyph();
                 glyph.start = start + i;
                 glyph.end = glyph.start + 1;
-                glyph.text = text.substring(glyph.start, glyph.end);
+                glyph.text = replaceForVertical(text.substring(glyph.start, glyph.end));
                 glyph.paint = paint;
                 if (shouldRotateForVertical(glyph.utf16Code())) {
                     glyph.x = (descent - ascent) / 2;
@@ -172,7 +175,7 @@ class GSLayoutUtils {
             }
         }
         if (isAlphaDigit(code)) {
-            if ('\'' == prevCode || '\"' == prevCode || 0x2019 == prevCode) {
+            if ('\'' == prevCode || '\"' == prevCode || '\u2019' == prevCode) {
                 return false;
             }
         }
@@ -293,31 +296,52 @@ class GSLayoutUtils {
         if (code < 0x2600) {
             return true;
         }
-        if (rotateForVertical == null) {
-            rotateForVertical = new HashSet<>();
-            rotateForVertical.add('\u2014'); // —
-            rotateForVertical.add('\u2026'); // …
-            rotateForVertical.add('\u3008'); // 〈
-            rotateForVertical.add('\u3009'); // 〉
-            rotateForVertical.add('\u300A'); // 《
-            rotateForVertical.add('\u300B'); // 》
-            rotateForVertical.add('\u300C'); // 「
-            rotateForVertical.add('\u300D'); // 」
-            rotateForVertical.add('\u300E'); // 『
-            rotateForVertical.add('\u300F'); // 』
-            rotateForVertical.add('\u3010'); // 【
-            rotateForVertical.add('\u3011'); // 】
-            rotateForVertical.add('\u3014'); // 〔
-            rotateForVertical.add('\u3015'); // 〕
-            rotateForVertical.add('\u3016'); // 〖
-            rotateForVertical.add('\u3017'); // 〗
-            rotateForVertical.add('\uFF08'); // （
-            rotateForVertical.add('\uFF09'); // ）
-            rotateForVertical.add('\uFF3B'); // ［
-            rotateForVertical.add('\uFF3D'); // ］
-            rotateForVertical.add('\uFF5B'); // ｛
-            rotateForVertical.add('\uFF5D'); // ｝
+        if (rotateForVerticalSet == null) {
+            rotateForVerticalSet = new HashSet<>();
+            rotateForVerticalSet.add('\u2014'); // —
+            rotateForVerticalSet.add('\u2026'); // …
+            rotateForVerticalSet.add('\u3008'); // 〈
+            rotateForVerticalSet.add('\u3009'); // 〉
+            rotateForVerticalSet.add('\u300A'); // 《
+            rotateForVerticalSet.add('\u300B'); // 》
+            rotateForVerticalSet.add('\u300C'); // 「
+            rotateForVerticalSet.add('\u300D'); // 」
+            rotateForVerticalSet.add('\u300E'); // 『
+            rotateForVerticalSet.add('\u300F'); // 』
+            rotateForVerticalSet.add('\u3010'); // 【
+            rotateForVerticalSet.add('\u3011'); // 】
+            rotateForVerticalSet.add('\u3014'); // 〔
+            rotateForVerticalSet.add('\u3015'); // 〕
+            rotateForVerticalSet.add('\u3016'); // 〖
+            rotateForVerticalSet.add('\u3017'); // 〗
+            rotateForVerticalSet.add('\uFF08'); // （
+            rotateForVerticalSet.add('\uFF09'); // ）
+            rotateForVerticalSet.add('\uFF3B'); // ［
+            rotateForVerticalSet.add('\uFF3D'); // ］
+            rotateForVerticalSet.add('\uFF5B'); // ｛
+            rotateForVerticalSet.add('\uFF5D'); // ｝
         }
-        return rotateForVertical.contains(code);
+        return rotateForVerticalSet.contains(code);
+    }
+
+    private String replaceForVertical(String text) {
+        if (text.length() > 1) {
+            return text;
+        }
+        if (replaceForVerticalMap == null) {
+            replaceForVerticalMap = new HashMap<>();
+            replaceForVerticalMap.put('\uFF0C', '\uFE10'); // ，
+            replaceForVerticalMap.put('\u3001', '\uFE11'); // 、
+            replaceForVerticalMap.put('\u3002', '\uFE12'); // 。
+            replaceForVerticalMap.put('\uFF1A', '\uFE13'); // ：
+            replaceForVerticalMap.put('\uFF1B', '\uFE14'); // ；
+            replaceForVerticalMap.put('\uFF01', '\uFE15'); // ！
+            replaceForVerticalMap.put('\uFF1F', '\uFE16'); // ？
+            //replaceForVerticalMap.put('\u3016', '\uFE17'); // 〖
+            //replaceForVerticalMap.put('\u3017', '\uFE18'); // 〗
+            //replaceForVerticalMap.put('\u2026', '\uFE19'); // …
+        }
+        Character value = replaceForVerticalMap.get(text.charAt(0));
+        return (value != null ? String.valueOf(value) : text);
     }
 }

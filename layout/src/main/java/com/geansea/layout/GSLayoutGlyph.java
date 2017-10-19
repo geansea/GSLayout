@@ -24,6 +24,10 @@ public class GSLayoutGlyph {
         return text.charAt(0);
     }
 
+    boolean isFullWidth() {
+        return (width > paint.getTextSize() * 0.9);
+    }
+
     RectF getRect() {
         if (rotateForVertical) {
             return new RectF(x - descent, y, x + ascent, y + width);
