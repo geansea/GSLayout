@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.text.Spanned;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -17,9 +16,8 @@ import com.geansea.layout.GSSimpleLayout;
 
 public class GSTextView extends View {
     private TextPaint paint;
-    private GSLayout layout;
+    private GSSimpleLayout layout;
     private String text;
-    private Spanned spanned;
     private boolean vertical;
 
     public GSTextView(Context context, AttributeSet attrs) {
@@ -32,14 +30,6 @@ public class GSTextView extends View {
     public void setText(String text, boolean vertical) {
         this.text = text;
         this.vertical = vertical;
-        spanned = null;
-        requestLayout();
-    }
-
-    public void setSpanned(Spanned spanned, boolean vertical) {
-        this.spanned = spanned;
-        this.vertical = vertical;
-        text = null;
         requestLayout();
     }
 
@@ -54,8 +44,6 @@ public class GSTextView extends View {
                     .setLineSpacing(0.2f)
                     .setParagraphSpacing(0.4f);
             layout = builder.build(0, getWidth(), getHeight(), vertical);
-        }
-        if (spanned != null) {
         }
     }
 
