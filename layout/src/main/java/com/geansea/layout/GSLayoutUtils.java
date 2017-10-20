@@ -56,12 +56,57 @@ class GSLayoutUtils {
         return false;
     }
 
-    boolean canGlyphCompressLeft(GSLayoutGlyph glyph) {
-        return glyph.isFullWidth() && canCompressLeft(glyph.utf16Code());
+    boolean canCompressLeft(char code) {
+        if (compressLeftSet == null) {
+            Character[] array = new Character[]{
+                    '\u2018', // ‘
+                    '\u201C', // “
+                    '\u3008', // 〈
+                    '\u300A', // 《
+                    '\u300C', // 「
+                    '\u300E', // 『
+                    '\u3010', // 【
+                    '\u3014', // 〔
+                    '\u3016', // 〖
+                    '\uFF08', // （
+                    '\uFF3B', // ［
+                    '\uFF5B', // ｛
+            };
+            compressLeftSet = new HashSet<>(Arrays.asList(array));
+        }
+        return compressLeftSet.contains(code);
     }
 
-    boolean canGlyphCompressRight(GSLayoutGlyph glyph) {
-        return glyph.isFullWidth() && canCompressRight(glyph.utf16Code());
+    boolean canCompressRight(char code) {
+        if (compressRightSet == null) {
+            Character[] array = new Character[]{
+                    '\u2019', // ’
+                    '\u201D', // ”
+                    '\u3001', // 、
+                    '\u3002', // 。
+                    '\u3009', // 〉
+                    '\u300B', // 》
+                    '\u300D', // 」
+                    '\u300F', // 』
+                    '\u3011', // 】
+                    '\u3015', // 〕
+                    '\u3017', // 〗
+                    '\uFF01', // ！
+                    '\uFF09', // ）
+                    '\uFF0C', // ，
+                    '\uFF1A', // ：
+                    '\uFF1B', // ；
+                    '\uFF1F', // ？
+                    '\uFF3D', // ］
+                    '\uFF5D', // ｝
+                    // For vertical
+                    '\uFE10', // ，
+                    '\uFE11', // 、
+                    '\uFE12', // 。
+            };
+            compressRightSet = new HashSet<>(Arrays.asList(array));
+        }
+        return compressRightSet.contains(code);
     }
 
     boolean canBreak(char prevCode, char code) {
@@ -161,6 +206,7 @@ class GSLayoutUtils {
             int length) {
         text = replaceTextForVertical(text);
         float y = 0;
+        float fontSize = paint.getTextSize();
         float ascent = -paint.ascent();
         float descent = paint.descent();
         float widths[] = new float[length];
@@ -178,7 +224,7 @@ class GSLayoutUtils {
                 glyph.end = glyph.start + 1;
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
-                if (shouldRotateForVertical(glyph.utf16Code())) {
+                if (shouldRotateForVertical(glyph.utf16Code()) || glyphSize < fontSize * 0.9) {
                     glyph.x = (descent - ascent) / 2;
                     glyph.y = y;
                     glyph.ascent = ascent;
@@ -211,59 +257,6 @@ class GSLayoutUtils {
 
     private boolean isCjk(char code) {
         return (0x4E00 <= code && code < 0xD800) || (0xE000 <= code && code < 0xFB00);
-    }
-
-    private boolean canCompressLeft(char code) {
-        if (compressLeftSet == null) {
-            Character[] array = new Character[]{
-                    '\u2018', // ‘
-                    '\u201C', // “
-                    '\u3008', // 〈
-                    '\u300A', // 《
-                    '\u300C', // 「
-                    '\u300E', // 『
-                    '\u3010', // 【
-                    '\u3014', // 〔
-                    '\u3016', // 〖
-                    '\uFF08', // （
-                    '\uFF3B', // ［
-                    '\uFF5B', // ｛
-            };
-            compressLeftSet = new HashSet<>(Arrays.asList(array));
-        }
-        return compressLeftSet.contains(code);
-    }
-
-    private boolean canCompressRight(char code) {
-        if (compressRightSet == null) {
-            Character[] array = new Character[]{
-                    '\u2019', // ’
-                    '\u201D', // ”
-                    '\u3001', // 、
-                    '\u3002', // 。
-                    '\u3009', // 〉
-                    '\u300B', // 》
-                    '\u300D', // 」
-                    '\u300F', // 』
-                    '\u3011', // 】
-                    '\u3015', // 〕
-                    '\u3017', // 〗
-                    '\uFF01', // ！
-                    '\uFF09', // ）
-                    '\uFF0C', // ，
-                    '\uFF1A', // ：
-                    '\uFF1B', // ；
-                    '\uFF1F', // ？
-                    '\uFF3D', // ］
-                    '\uFF5D', // ｝
-                    // For vertical
-                    '\uFE10', // ，
-                    '\uFE11', // 、
-                    '\uFE12', // 。
-            };
-            compressRightSet = new HashSet<>(Arrays.asList(array));
-        }
-        return compressRightSet.contains(code);
     }
 
     private boolean cannotLineBegin(char code) {

@@ -215,22 +215,30 @@ public class GSSimpleLayout extends GSLayout {
                 move += fontSize / 6;
             }
             // Punctuation compress
-            if (utils.canGlyphCompressLeft(thisGlyph)) {
+            if (utils.canCompressLeft(code)) {
                 if (0 == prevCode) {
-                    thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate();
-                    move -= thisGlyph.compressLeft;
+                    if (thisGlyph.isFullWidth()) {
+                        thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate();
+                        move -= thisGlyph.compressLeft;
+                    }
                 }
-                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
-                    thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate() / 2;
-                    move -= thisGlyph.compressLeft;
-                    prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
-                    move -= prevGlyph.compressRight;
+                if (utils.canCompressRight(prevCode)) {
+                    if (thisGlyph.isFullWidth()) {
+                        thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate() / 2;
+                        move -= thisGlyph.compressLeft;
+                    }
+                    if (prevGlyph != null && prevGlyph.isFullWidth()) {
+                        prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
+                        move -= prevGlyph.compressRight;
+                    }
                 }
             }
-            if (utils.canGlyphCompressRight(thisGlyph)) {
-                if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
-                    prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
-                    move -= prevGlyph.compressRight;
+            if (utils.canCompressRight(code)) {
+                if (utils.canCompressRight(prevCode)) {
+                    if (prevGlyph != null && prevGlyph.isFullWidth()) {
+                        prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
+                        move -= prevGlyph.compressRight;
+                    }
                 }
             }
             // Move
@@ -259,9 +267,9 @@ public class GSSimpleLayout extends GSLayout {
             }
             float currentSize = getVertical() ? thisGlyph.getUsedRect().bottom : thisGlyph.getUsedRect().right;
             if (currentSize > size) {
-                if (utils.canGlyphCompressRight(thisGlyph)) {
-                    float compressRight = thisGlyph.width * getPunctuationCompressRate();
-                    currentSize = (getVertical() ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
+                if (utils.canCompressRight(thisGlyph.utf16Code()) && thisGlyph.isFullWidth()) {
+                        float compressRight = thisGlyph.width * getPunctuationCompressRate();
+                        currentSize = (getVertical() ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
                 }
             }
             if (currentSize > size) {
@@ -297,14 +305,18 @@ public class GSSimpleLayout extends GSLayout {
                 lastGlyph = glyphs.get(count - 2);
             }
         }
-        if (utils.canGlyphCompressRight(lastGlyph)) {
+        if (utils.canCompressRight(lastGlyph.utf16Code()) && lastGlyph.isFullWidth()) {
             lastGlyph.compressRight = lastGlyph.width * getPunctuationCompressRate();
         }
         if (' ' == lastGlyph.utf16Code()) {
             lastGlyph.compressRight = lastGlyph.width;
         }
         if (crlfGlyph != null) {
-            crlfGlyph.x = lastGlyph.getUsedRect().right;
+            if (getVertical()) {
+                crlfGlyph.y = lastGlyph.getUsedRect().bottom;
+            } else {
+                crlfGlyph.x = lastGlyph.getUsedRect().right;
+            }
         }
     }
 
