@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -26,6 +27,7 @@ public class GSTextView extends View {
         super(context, attrs);
         paint = new TextPaint();
         paint.setAntiAlias(true);
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/SourceHanSerifCN-Light.otf"));
     }
 
     public void setText(String text) {

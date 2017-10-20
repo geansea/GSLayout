@@ -10,6 +10,8 @@ import android.widget.CompoundButton;
 
 public class MainActivity extends AppCompatActivity {
 
+    private String mTestText;
+
     private GSTextView mTextMessage;
     private CheckBox mHelpingLineCheckBox;
     private CheckBox mVerticalCheckBox;
@@ -21,13 +23,11 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_pure_text:
-                    mTextMessage.setText("兩種用法都有。以我所見，以「」爲一級引號者較多，大約占80%吧。香港、台灣目前大部分印刷書籍和雜誌都採用此法。");
+                    mTextMessage.setText(mTestText);
                     return true;
                 case R.id.navigation_rich_text:
-                    mTextMessage.setText("兩種用法都有。以我所見，以「」爲一級引號者較多，大約占80%吧。香港、台灣目前大部分印刷書籍和雜誌都採用此法。");
                     return true;
                 case R.id.navigation_complex_area:
-                    mTextMessage.setText("");
                     return true;
             }
             return false;
@@ -52,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTestText = "The quick brown fox jumps over the lazy dog.\n" +
+                "Ligature test: ff ffi ffl fi fl ft\n" +
+                "《决胜全面建成小康社会 夺取新时代中国特色社会主义伟大胜利》习近平代表第十八届中央委员会于2017年10月18日在中国共产党第十九次全国代表大会上向大会作的报告。\n" +
+                "大会的主题是：不忘初心，牢记使命，高举中国特色社会主义伟大旗帜，决胜全面建成小康社会，夺取新时代中国特色社会主义伟大胜利，为实现中华民族伟大复兴的中国梦不懈奋斗。";
 
         mTextMessage = (GSTextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
