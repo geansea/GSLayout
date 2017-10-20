@@ -1,6 +1,7 @@
 package com.geansea.layout;
 
 import android.graphics.PointF;
+import android.support.annotation.NonNull;
 import android.text.TextPaint;
 
 import java.util.ArrayList;
@@ -9,20 +10,19 @@ import java.util.List;
 
 public class GSSimpleLayout extends GSLayout {
     public static final class Builder {
-        private String text;
         private TextPaint paint;
         private float indent;
         private float punctuationCompressRate;
         private Alignment alignment;
         private float lineSpacing;
         private float paragraphSpacing;
+        private boolean vertical;
 
-        public static Builder obtain(String text, TextPaint paint) {
-            return new Builder(text, paint);
+        public static Builder obtain(@NonNull TextPaint paint) {
+            return new Builder(paint);
         }
 
-        private Builder(String text, TextPaint paint) {
-            this.text = text;
+        private Builder(@NonNull TextPaint paint) {
             this.paint = paint;
             alignment = Alignment.ALIGN_NORMAL;
             punctuationCompressRate = 1;
@@ -58,20 +58,25 @@ public class GSSimpleLayout extends GSLayout {
             return this;
         }
 
-        public GSSimpleLayout build(int start, int end, int width, int height, boolean vertical) {
+        public Builder setVertical(boolean vertical) {
+            this.vertical = vertical;
+            return this;
+        }
+
+        public GSSimpleLayout build(@NonNull String text, int start, int end, int width, int height) {
             GSSimpleLayout layout = new GSSimpleLayout(
                     text,
                     start,
                     end,
                     paint,
                     width,
-                    height);
-            layout.indent = indent;
-            layout.punctuationCompressRate = punctuationCompressRate;
-            layout.alignment = alignment;
-            layout.lineSpacing = lineSpacing;
-            layout.paragraphSpacing = paragraphSpacing;
-            layout.vertical = vertical;
+                    height,
+                    indent,
+                    punctuationCompressRate,
+                    alignment,
+                    lineSpacing,
+                    paragraphSpacing,
+                    vertical);
             layout.doLayout();
             return layout;
         }
@@ -79,18 +84,37 @@ public class GSSimpleLayout extends GSLayout {
 
     private GSLayoutUtils utils;
 
-    private GSSimpleLayout(String text,
+    private GSSimpleLayout(@NonNull String text,
                            int start,
                            int end,
-                           TextPaint paint,
+                           @NonNull TextPaint paint,
                            int width,
-                           int height) {
-        super(text, start, end, paint, width, height);
+                           int height,
+                           float indent,
+                           float punctuationCompressRate,
+                           Alignment alignment,
+                           float lineSpacing,
+                           float paragraphSpacing,
+                           boolean vertical) {
+        super(
+                text,
+                start,
+                end,
+                paint,
+                width,
+                height,
+                indent,
+                punctuationCompressRate,
+                alignment,
+                lineSpacing,
+                paragraphSpacing,
+                vertical
+        );
         utils = new GSLayoutUtils();
     }
 
     private void doLayout() {
-        if (vertical) {
+        if (getVertical()) {
             doVerticalLayout();
         } else {
             doHorizontalLayout();
@@ -113,9 +137,9 @@ public class GSSimpleLayout extends GSLayout {
             lines.add(line);
             lineLocation = line.end;
             maxWidth = Math.max(maxWidth, line.size);
-            lineTop += fontSize * lineSpacing;
+            lineTop += fontSize * getLineSpacing();
             if (utils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
-                lineTop += fontSize * paragraphSpacing;
+                lineTop += fontSize * getParagraphSpacing();
             }
         }
         if (lines.size() > 0) {
@@ -124,7 +148,7 @@ public class GSSimpleLayout extends GSLayout {
             setUsedWidth(maxWidth);
             setUsedHeight(last.getUsedRect().bottom);
         }
-        this.lines = new ArrayList<>(lines);
+        setLines(lines);
     }
 
     private void doVerticalLayout() {
@@ -143,9 +167,9 @@ public class GSSimpleLayout extends GSLayout {
             lines.add(line);
             lineLocation = line.end;
             maxHeight = Math.max(maxHeight, line.size);
-            lineRight -= fontSize * lineSpacing;
+            lineRight -= fontSize * getLineSpacing();
             if (utils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
-                lineRight -= fontSize * paragraphSpacing;
+                lineRight -= fontSize * getParagraphSpacing();
             }
         }
         if (lines.size() > 0) {
@@ -154,7 +178,7 @@ public class GSSimpleLayout extends GSLayout {
             setUsedWidth(getWidth() - last.getUsedRect().left);
             setUsedHeight(maxHeight);
         }
-        this.lines = new ArrayList<>(lines);
+        setLines(lines);
     }
 
     private GSLayoutLine layoutLine(int start) {
@@ -162,17 +186,17 @@ public class GSSimpleLayout extends GSLayout {
         float fontSize = getPaint().getTextSize();
         float lineIndent = 0;
         if (0 == start || utils.isNewline(text.charAt(start - 1))) {
-            lineIndent = fontSize * indent;
+            lineIndent = fontSize * getIndent();
         }
-        float layoutSize = vertical ? getHeight() - lineIndent : getWidth() - lineIndent;
+        float layoutSize = getVertical() ? getHeight() - lineIndent : getWidth() - lineIndent;
         float trySize = layoutSize * 1.3f;
-        ArrayList<GSLayoutGlyph> tryGlyphs = utils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, vertical);
+        ArrayList<GSLayoutGlyph> tryGlyphs = utils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, getVertical());
         compressGlyphs(tryGlyphs);
         int breakPos = breakPosForGlyphs(tryGlyphs, layoutSize);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>(tryGlyphs.subList(0, breakPos));
         adjustEndGlyphs(glyphs);
         PointF origin = adjustGlyphs(glyphs, layoutSize, lineIndent);
-        if (vertical) {
+        if (getVertical()) {
             return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
             return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
@@ -193,24 +217,24 @@ public class GSSimpleLayout extends GSLayout {
             // Punctuation compress
             if (utils.canGlyphCompressLeft(thisGlyph)) {
                 if (0 == prevCode) {
-                    thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate;
+                    thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate();
                     move -= thisGlyph.compressLeft;
                 }
                 if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
-                    thisGlyph.compressLeft = thisGlyph.width * punctuationCompressRate / 2;
+                    thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate() / 2;
                     move -= thisGlyph.compressLeft;
-                    prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
+                    prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
                     move -= prevGlyph.compressRight;
                 }
             }
             if (utils.canGlyphCompressRight(thisGlyph)) {
                 if (prevGlyph != null && utils.canGlyphCompressRight(prevGlyph)) {
-                    prevGlyph.compressRight = prevGlyph.width * punctuationCompressRate / 2;
+                    prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
                     move -= prevGlyph.compressRight;
                 }
             }
             // Move
-            if (vertical) {
+            if (getVertical()) {
                 thisGlyph.y += move;
             } else {
                 thisGlyph.x += move;
@@ -233,11 +257,11 @@ public class GSSimpleLayout extends GSLayout {
             if (utils.canBreak(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                 breakPos = i;
             }
-            float currentSize = vertical ? thisGlyph.getUsedRect().bottom : thisGlyph.getUsedRect().right;
+            float currentSize = getVertical() ? thisGlyph.getUsedRect().bottom : thisGlyph.getUsedRect().right;
             if (currentSize > size) {
                 if (utils.canGlyphCompressRight(thisGlyph)) {
-                    float compressRight = thisGlyph.width * punctuationCompressRate;
-                    currentSize = (vertical ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
+                    float compressRight = thisGlyph.width * getPunctuationCompressRate();
+                    currentSize = (getVertical() ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
                 }
             }
             if (currentSize > size) {
@@ -274,7 +298,7 @@ public class GSSimpleLayout extends GSLayout {
             }
         }
         if (utils.canGlyphCompressRight(lastGlyph)) {
-            lastGlyph.compressRight = lastGlyph.width * punctuationCompressRate;
+            lastGlyph.compressRight = lastGlyph.width * getPunctuationCompressRate();
         }
         if (' ' == lastGlyph.utf16Code()) {
             lastGlyph.compressRight = lastGlyph.width;
@@ -286,7 +310,7 @@ public class GSSimpleLayout extends GSLayout {
 
     private PointF adjustGlyphs(List<GSLayoutGlyph> glyphs, float width, float indent) {
         PointF origin = new PointF();
-        if (vertical) {
+        if (getVertical()) {
             origin.y = indent;
         } else {
             origin.x = indent;
@@ -296,21 +320,21 @@ public class GSSimpleLayout extends GSLayout {
         if (lastGlyph.end == getText().length()) {
             reachEnd = true;
         }
-        float lineSize = vertical ? lastGlyph.getUsedRect().bottom : lastGlyph.getUsedRect().right;
+        float lineSize = getVertical() ? lastGlyph.getUsedRect().bottom : lastGlyph.getUsedRect().right;
         float adjustSize = width - lineSize;
         if (adjustSize > 0) {
-            switch (alignment) {
+            switch (getAlignment()) {
                 case ALIGN_NORMAL:
                     break;
                 case ALIGN_OPPOSITE:
-                    if (vertical) {
+                    if (getVertical()) {
                         origin.y += adjustSize;
                     } else {
                         origin.x += adjustSize;
                     }
                     break;
                 case ALIGN_CENTER:
-                    if (vertical) {
+                    if (getVertical()) {
                         origin.y += adjustSize / 2;
                     } else {
                         origin.x += adjustSize / 2;
@@ -334,7 +358,7 @@ public class GSSimpleLayout extends GSLayout {
                             if (utils.canStretch(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                                 move += stretchSize;
                             }
-                            if (vertical) {
+                            if (getVertical()) {
                                 thisGlyph.y += move;
                             } else {
                                 thisGlyph.x += move;

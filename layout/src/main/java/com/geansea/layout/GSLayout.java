@@ -2,8 +2,10 @@ package com.geansea.layout;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.support.annotation.NonNull;
 import android.text.TextPaint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GSLayout {
@@ -17,10 +19,6 @@ public abstract class GSLayout {
 
     public int getEnd() {
         return end;
-    }
-
-    public TextPaint getPaint() {
-        return paint;
     }
 
     public int getWidth() {
@@ -47,20 +45,11 @@ public abstract class GSLayout {
         }
     }
 
-    public int getLineCount() {
-        if (lines != null) {
-            return lines.size();
-        } else {
-            return 0;
+    public ArrayList<GSLayoutLine> getLines() {
+        if (lines == null) {
+            return new ArrayList<>();
         }
-    }
-
-    public GSLayoutLine getLine(int index) {
-        if (lines != null && 0 <= index && index < lines.size()) {
-            return lines.get(index);
-        } else {
-            return null;
-        }
+        return new ArrayList<>(lines);
     }
 
     public void draw(Canvas canvas) {
@@ -79,22 +68,38 @@ public abstract class GSLayout {
         ALIGN_JUSTIFY,
     }
 
-    GSLayout(CharSequence text,
+    GSLayout(@NonNull CharSequence text,
              int start,
              int end,
-             TextPaint paint,
+             @NonNull TextPaint paint,
              int width,
-             int height) {
+             int height,
+             float indent,
+             float punctuationCompressRate,
+             Alignment alignment,
+             float lineSpacing,
+             float paragraphSpacing,
+             boolean vertical) {
         this.text = text;
         this.start = start;
         this.end = end;
         this.paint = paint;
         this.width = width;
         this.height = height;
+        this.indent = indent;
+        this.punctuationCompressRate = punctuationCompressRate;
+        this.alignment = alignment;
+        this.lineSpacing = lineSpacing;
+        this.paragraphSpacing = paragraphSpacing;
+        this.vertical = vertical;
     }
 
     void setEnd(int end) {
         this.end = end;
+    }
+
+    TextPaint getPaint() {
+        return paint;
     }
 
     void setUsedWidth(float usedWidth) {
@@ -105,6 +110,34 @@ public abstract class GSLayout {
         this.usedHeight = usedHeight;
     }
 
+    float getIndent() {
+        return indent;
+    }
+
+    float getPunctuationCompressRate() {
+        return punctuationCompressRate;
+    }
+
+    Alignment getAlignment() {
+        return alignment;
+    }
+
+    float getLineSpacing() {
+        return lineSpacing;
+    }
+
+    float getParagraphSpacing() {
+        return paragraphSpacing;
+    }
+
+    boolean getVertical() {
+        return vertical;
+    }
+
+    void setLines(List<GSLayoutLine> lines) {
+        this.lines = lines;
+    }
+
     private CharSequence text;
     private int start;
     private int end;
@@ -113,11 +146,11 @@ public abstract class GSLayout {
     private int height;
     private float usedWidth;
     private float usedHeight;
-    protected float indent;
-    protected float punctuationCompressRate;
-    protected Alignment alignment;
-    protected float lineSpacing;
-    protected float paragraphSpacing;
-    protected boolean vertical;
-    protected List<GSLayoutLine> lines;
+    private float indent;
+    private float punctuationCompressRate;
+    private Alignment alignment;
+    private float lineSpacing;
+    private float paragraphSpacing;
+    private boolean vertical;
+    private List<GSLayoutLine> lines;
 }
