@@ -117,7 +117,7 @@ class GSLayoutUtils {
         if (' ' == prevCode) {
             return true;
         }
-        // false Break SPace
+        // No Break SPace
         if ('\u00A0' == prevCode) {
             return false;
         }

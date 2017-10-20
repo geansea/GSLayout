@@ -188,14 +188,14 @@ public class GSSimpleLayout extends GSLayout {
         if (0 == start || utils.isNewline(text.charAt(start - 1))) {
             lineIndent = fontSize * getIndent();
         }
-        float layoutSize = getVertical() ? getHeight() - lineIndent : getWidth() - lineIndent;
+        float layoutSize = getVertical() ? getHeight() : getWidth();
         float trySize = layoutSize * 1.3f;
         ArrayList<GSLayoutGlyph> tryGlyphs = utils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, getVertical());
-        compressGlyphs(tryGlyphs);
+        compressGlyphs(tryGlyphs, lineIndent);
         int breakPos = breakPosForGlyphs(tryGlyphs, layoutSize);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>(tryGlyphs.subList(0, breakPos));
         adjustEndGlyphs(glyphs);
-        PointF origin = adjustGlyphs(glyphs, layoutSize, lineIndent);
+        PointF origin = adjustGlyphs(glyphs, layoutSize);
         if (getVertical()) {
             return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
@@ -203,9 +203,9 @@ public class GSSimpleLayout extends GSLayout {
         }
     }
 
-    private void compressGlyphs(ArrayList<GSLayoutGlyph> glyphs) {
+    private void compressGlyphs(ArrayList<GSLayoutGlyph> glyphs, float indent) {
         float fontSize = getPaint().getTextSize();
-        float move = 0;
+        float move = indent;
         GSLayoutGlyph prevGlyph = null;
         for (GSLayoutGlyph thisGlyph : glyphs) {
             char code = thisGlyph.utf16Code();
@@ -320,13 +320,8 @@ public class GSSimpleLayout extends GSLayout {
         }
     }
 
-    private PointF adjustGlyphs(List<GSLayoutGlyph> glyphs, float width, float indent) {
+    private PointF adjustGlyphs(List<GSLayoutGlyph> glyphs, float width) {
         PointF origin = new PointF();
-        if (getVertical()) {
-            origin.y = indent;
-        } else {
-            origin.x = indent;
-        }
         GSLayoutGlyph lastGlyph = glyphs.get(glyphs.size() - 1);
         boolean reachEnd = utils.isNewline(lastGlyph.utf16Code());
         if (lastGlyph.end == getText().length()) {
