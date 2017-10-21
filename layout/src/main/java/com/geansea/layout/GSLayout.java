@@ -68,18 +68,19 @@ public abstract class GSLayout {
         ALIGN_JUSTIFY,
     }
 
-    GSLayout(@NonNull CharSequence text,
-             int start,
-             int end,
-             @NonNull TextPaint paint,
-             int width,
-             int height,
-             float indent,
-             float punctuationCompressRate,
-             Alignment alignment,
-             float lineSpacing,
-             float paragraphSpacing,
-             boolean vertical) {
+    GSLayout(
+            @NonNull CharSequence text,
+            int start,
+            int end,
+            @NonNull TextPaint paint,
+            int width,
+            int height,
+            float indent,
+            float punctuationCompressRate,
+            Alignment alignment,
+            float lineSpacing,
+            float paragraphSpacing,
+            boolean vertical) {
         this.text = text;
         this.start = start;
         this.end = end;

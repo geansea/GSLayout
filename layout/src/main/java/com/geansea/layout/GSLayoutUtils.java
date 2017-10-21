@@ -1,5 +1,6 @@
 package com.geansea.layout;
 
+import android.text.Spanned;
 import android.text.TextPaint;
 
 import java.util.ArrayList;
@@ -249,6 +250,22 @@ class GSLayoutUtils {
             y += glyphSize;
         }
         return glyphs;
+    }
+
+    private ArrayList<GSLayoutGlyph> glyphsForSpannedHorizontalLayout(
+            Spanned text,
+            TextPaint paint,
+            int start,
+            int length) {
+        return null;
+    }
+
+    private ArrayList<GSLayoutGlyph> glyphsForSpannedVerticalLayout(
+            Spanned text,
+            TextPaint paint,
+            int start,
+            int length) {
+        return null;
     }
 
     private boolean isAlphaDigit(char code) {

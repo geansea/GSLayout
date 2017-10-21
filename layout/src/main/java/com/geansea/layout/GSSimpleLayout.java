@@ -84,18 +84,19 @@ public class GSSimpleLayout extends GSLayout {
 
     private GSLayoutUtils utils;
 
-    private GSSimpleLayout(@NonNull String text,
-                           int start,
-                           int end,
-                           @NonNull TextPaint paint,
-                           int width,
-                           int height,
-                           float indent,
-                           float punctuationCompressRate,
-                           Alignment alignment,
-                           float lineSpacing,
-                           float paragraphSpacing,
-                           boolean vertical) {
+    private GSSimpleLayout(
+            @NonNull String text,
+            int start,
+            int end,
+            @NonNull TextPaint paint,
+            int width,
+            int height,
+            float indent,
+            float punctuationCompressRate,
+            Alignment alignment,
+            float lineSpacing,
+            float paragraphSpacing,
+            boolean vertical) {
         super(
                 text,
                 start,
