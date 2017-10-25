@@ -97,7 +97,7 @@ final class GSLayoutUtils {
                 glyph.end = glyph.start + 1;
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
-                if (characterUtils.shouldRotateForVertical(glyph.utf16Code()) || glyphSize < fontSize * 0.9) {
+                if (characterUtils.shouldRotateForVertical(glyph.code()) || glyphSize < fontSize * 0.9) {
                     glyph.x = (descent - ascent) / 2;
                     glyph.y = y;
                     glyph.ascent = ascent;

@@ -21,7 +21,8 @@ public class GSLayoutGlyph {
     GSLayoutGlyph() {
     }
 
-    char utf16Code() {
+    char code() {
+        // Use UTF-16 code to handle attributes
         return text.charAt(0);
     }
 
