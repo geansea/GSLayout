@@ -82,7 +82,8 @@ public class GSSimpleLayout extends GSLayout {
         }
     }
 
-    private GSLayoutUtils utils;
+    final private GSCharacterUtils characterUtils;
+    final private GSLayoutUtils layoutUtils;
 
     private GSSimpleLayout(
             @NonNull String text,
@@ -111,7 +112,8 @@ public class GSSimpleLayout extends GSLayout {
                 paragraphSpacing,
                 vertical
         );
-        utils = new GSLayoutUtils();
+        characterUtils = new GSCharacterUtils();
+        layoutUtils = new GSLayoutUtils(characterUtils);
     }
 
     private void doLayout() {
@@ -139,7 +141,7 @@ public class GSSimpleLayout extends GSLayout {
             lineLocation = line.end;
             maxWidth = Math.max(maxWidth, line.size);
             lineTop += fontSize * getLineSpacing();
-            if (utils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
+            if (characterUtils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
                 lineTop += fontSize * getParagraphSpacing();
             }
         }
@@ -169,7 +171,7 @@ public class GSSimpleLayout extends GSLayout {
             lineLocation = line.end;
             maxHeight = Math.max(maxHeight, line.size);
             lineRight -= fontSize * getLineSpacing();
-            if (utils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
+            if (characterUtils.isNewline(line.glyphs.get(line.glyphs.size() - 1).utf16Code())) {
                 lineRight -= fontSize * getParagraphSpacing();
             }
         }
@@ -186,12 +188,12 @@ public class GSSimpleLayout extends GSLayout {
         CharSequence text = getText();
         float fontSize = getPaint().getTextSize();
         float lineIndent = 0;
-        if (0 == start || utils.isNewline(text.charAt(start - 1))) {
+        if (0 == start || characterUtils.isNewline(text.charAt(start - 1))) {
             lineIndent = fontSize * getIndent();
         }
         float layoutSize = getVertical() ? getHeight() : getWidth();
         float trySize = layoutSize * 1.3f;
-        ArrayList<GSLayoutGlyph> tryGlyphs = utils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, getVertical());
+        ArrayList<GSLayoutGlyph> tryGlyphs = layoutUtils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, getVertical());
         compressGlyphs(tryGlyphs, lineIndent);
         int breakPos = breakPosForGlyphs(tryGlyphs, layoutSize);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>(tryGlyphs.subList(0, breakPos));
@@ -212,18 +214,18 @@ public class GSSimpleLayout extends GSLayout {
             char code = thisGlyph.utf16Code();
             char prevCode = (prevGlyph != null) ? prevGlyph.utf16Code() : 0;
             // Add gap
-            if (utils.shouldAddGap(prevCode, code)) {
+            if (characterUtils.shouldAddGap(prevCode, code)) {
                 move += fontSize / 6;
             }
             // Punctuation compress
-            if (utils.canCompressLeft(code)) {
+            if (characterUtils.canCompressLeft(code)) {
                 if (0 == prevCode) {
                     if (thisGlyph.isFullWidth()) {
                         thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate();
                         move -= thisGlyph.compressLeft;
                     }
                 }
-                if (utils.canCompressRight(prevCode)) {
+                if (characterUtils.canCompressRight(prevCode)) {
                     if (thisGlyph.isFullWidth()) {
                         thisGlyph.compressLeft = thisGlyph.width * getPunctuationCompressRate() / 2;
                         move -= thisGlyph.compressLeft;
@@ -234,8 +236,8 @@ public class GSSimpleLayout extends GSLayout {
                     }
                 }
             }
-            if (utils.canCompressRight(code)) {
-                if (utils.canCompressRight(prevCode)) {
+            if (characterUtils.canCompressRight(code)) {
+                if (characterUtils.canCompressRight(prevCode)) {
                     if (prevGlyph != null && prevGlyph.isFullWidth()) {
                         prevGlyph.compressRight = prevGlyph.width * getPunctuationCompressRate() / 2;
                         move -= prevGlyph.compressRight;
@@ -249,7 +251,7 @@ public class GSSimpleLayout extends GSLayout {
                 thisGlyph.x += move;
             }
             // Fix CRLF width
-            if (utils.isNewline(code)) {
+            if (characterUtils.isNewline(code)) {
                 move -= thisGlyph.width;
                 thisGlyph.compressRight = thisGlyph.width;
             }
@@ -263,12 +265,12 @@ public class GSSimpleLayout extends GSLayout {
         for (int i = 1; i < glyphs.size(); ++i) {
             GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
             GSLayoutGlyph thisGlyph = glyphs.get(i);
-            if (utils.canBreak(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
+            if (characterUtils.canBreak(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                 breakPos = i;
             }
             float currentSize = getVertical() ? thisGlyph.getUsedRect().bottom : thisGlyph.getUsedRect().right;
             if (currentSize > size) {
-                if (utils.canCompressRight(thisGlyph.utf16Code()) && thisGlyph.isFullWidth()) {
+                if (characterUtils.canCompressRight(thisGlyph.utf16Code()) && thisGlyph.isFullWidth()) {
                         float compressRight = thisGlyph.width * getPunctuationCompressRate();
                         currentSize = (getVertical() ? thisGlyph.getRect().bottom : thisGlyph.getRect().right) - compressRight;
                 }
@@ -300,13 +302,13 @@ public class GSSimpleLayout extends GSLayout {
         int count = glyphs.size();
         GSLayoutGlyph lastGlyph = glyphs.get(count - 1);
         GSLayoutGlyph crlfGlyph = null;
-        if (utils.isNewline(lastGlyph.utf16Code())) {
+        if (characterUtils.isNewline(lastGlyph.utf16Code())) {
             crlfGlyph = lastGlyph;
             if (count > 1) {
                 lastGlyph = glyphs.get(count - 2);
             }
         }
-        if (utils.canCompressRight(lastGlyph.utf16Code()) && lastGlyph.isFullWidth()) {
+        if (characterUtils.canCompressRight(lastGlyph.utf16Code()) && lastGlyph.isFullWidth()) {
             lastGlyph.compressRight = lastGlyph.width * getPunctuationCompressRate();
         }
         if (' ' == lastGlyph.utf16Code()) {
@@ -324,7 +326,7 @@ public class GSSimpleLayout extends GSLayout {
     private PointF adjustGlyphs(List<GSLayoutGlyph> glyphs, float width) {
         PointF origin = new PointF();
         GSLayoutGlyph lastGlyph = glyphs.get(glyphs.size() - 1);
-        boolean reachEnd = utils.isNewline(lastGlyph.utf16Code());
+        boolean reachEnd = characterUtils.isNewline(lastGlyph.utf16Code());
         if (lastGlyph.end == getText().length()) {
             reachEnd = true;
         }
@@ -354,7 +356,7 @@ public class GSSimpleLayout extends GSLayout {
                         for (int i = 1; i < glyphs.size(); ++i) {
                             GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
                             GSLayoutGlyph thisGlyph = glyphs.get(i);
-                            if (utils.canStretch(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
+                            if (characterUtils.canStretch(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                                 ++stretchCount;
                             }
                         }
@@ -363,7 +365,7 @@ public class GSSimpleLayout extends GSLayout {
                         for (int i = 1; i < glyphs.size(); ++i) {
                             GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
                             GSLayoutGlyph thisGlyph = glyphs.get(i);
-                            if (utils.canStretch(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
+                            if (characterUtils.canStretch(prevGlyph.utf16Code(), thisGlyph.utf16Code())) {
                                 move += stretchSize;
                             }
                             if (getVertical()) {
