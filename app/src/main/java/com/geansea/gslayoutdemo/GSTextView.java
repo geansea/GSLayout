@@ -16,18 +16,22 @@ import com.geansea.layout.GSLayoutLine;
 import com.geansea.layout.GSSimpleLayout;
 
 public class GSTextView extends View {
-    private TextPaint paint;
-    private GSSimpleLayout layout;
+    private GSLayout.Parameters parameters;
     private String text;
-    private float punctuationCompressRate;
-    private boolean vertical;
+    private GSSimpleLayout layout;
     private boolean drawHelpingLine;
 
     public GSTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        paint = new TextPaint();
+        TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);
         paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/SourceHanSerifCN-Light.otf"));
+        parameters = GSLayout.Parameters.obtain(paint)
+                .setFontSize(36)
+                .setIndent(2)
+                .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
+                .setLineSpacing(0.2f)
+                .setParagraphSpacing(0.4f);
     }
 
     public void setText(String text) {
@@ -36,12 +40,12 @@ public class GSTextView extends View {
     }
 
     public void setPunctuationCompressRate(float punctuationCompressRate) {
-        this.punctuationCompressRate = punctuationCompressRate;
+        parameters.setPunctuationCompressRate(punctuationCompressRate);
         requestLayout();
     }
 
     public void setVertical(boolean vertical) {
-        this.vertical = vertical;
+        parameters.setVertical(vertical);
         requestLayout();
     }
 
@@ -54,17 +58,8 @@ public class GSTextView extends View {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         layout = null;
         if (text != null) {
-            GSSimpleLayout.Builder builder = GSSimpleLayout.Builder.obtain(paint)
-                    .setFontSize(36)
-                    .setWidth(getWidth())
-                    .setHeight(getHeight())
-                    .setIndent(2)
-                    .setPunctuationCompressRate(punctuationCompressRate)
-                    .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
-                    .setLineSpacing(0.2f)
-                    .setParagraphSpacing(0.4f)
-                    .setVertical(vertical);
-            layout = builder.build(text);
+            parameters.setWidth(getWidth()).setHeight(getHeight());
+            layout = GSSimpleLayout.build(text, parameters);
         }
     }
 
