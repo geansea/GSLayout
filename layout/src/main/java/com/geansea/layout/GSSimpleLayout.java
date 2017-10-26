@@ -4,13 +4,14 @@ import android.graphics.PointF;
 import android.support.annotation.NonNull;
 import android.text.TextPaint;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class GSSimpleLayout extends GSLayout {
     public static final class Builder {
         private TextPaint paint;
+        private int width;
+        private int height;
         private float indent;
         private float punctuationCompressRate;
         private Alignment alignment;
@@ -30,6 +31,16 @@ public class GSSimpleLayout extends GSLayout {
 
         public Builder setFontSize(float fontSize) {
             paint.setTextSize(fontSize);
+            return this;
+        }
+
+        public Builder setWidth(int width) {
+            this.width = width;
+            return this;
+        }
+
+        public Builder setHeight(int height) {
+            this.height = height;
             return this;
         }
 
@@ -63,54 +74,36 @@ public class GSSimpleLayout extends GSLayout {
             return this;
         }
 
-        public GSSimpleLayout build(@NonNull String text, int start, int end, int width, int height) {
-            GSSimpleLayout layout = new GSSimpleLayout(
-                    text,
-                    start,
-                    end,
-                    paint,
-                    width,
-                    height,
-                    indent,
-                    punctuationCompressRate,
-                    alignment,
-                    lineSpacing,
-                    paragraphSpacing,
-                    vertical);
+        public GSSimpleLayout build(@NonNull String text, int start, int end) {
+            GSSimpleLayout layout = new GSSimpleLayout(text, start, end, this);
             layout.doLayout();
             return layout;
         }
+
+        public GSSimpleLayout build(@NonNull String text) {
+            return build(text, 0, text.length());
+        }
     }
 
-    final private GSCharacterUtils characterUtils;
-    final private GSLayoutUtils layoutUtils;
+    private static final float SIZE_EXTEND_TIMES = 1.3f;
 
-    private GSSimpleLayout(
-            @NonNull String text,
-            int start,
-            int end,
-            @NonNull TextPaint paint,
-            int width,
-            int height,
-            float indent,
-            float punctuationCompressRate,
-            Alignment alignment,
-            float lineSpacing,
-            float paragraphSpacing,
-            boolean vertical) {
+    private final GSCharacterUtils characterUtils;
+    private final GSLayoutUtils layoutUtils;
+
+    private GSSimpleLayout(String text, int start, int end, Builder builder) {
         super(
                 text,
                 start,
                 end,
-                paint,
-                width,
-                height,
-                indent,
-                punctuationCompressRate,
-                alignment,
-                lineSpacing,
-                paragraphSpacing,
-                vertical
+                builder.paint,
+                builder.width,
+                builder.height,
+                builder.indent,
+                builder.punctuationCompressRate,
+                builder.alignment,
+                builder.lineSpacing,
+                builder.paragraphSpacing,
+                builder.vertical
         );
         characterUtils = new GSCharacterUtils();
         layoutUtils = new GSLayoutUtils(characterUtils);
@@ -185,20 +178,27 @@ public class GSSimpleLayout extends GSLayout {
     }
 
     private GSLayoutLine layoutLine(int start) {
-        CharSequence text = getText();
-        float fontSize = getPaint().getTextSize();
-        float lineIndent = 0;
+        String text = getText().toString();
+        TextPaint paint = getPaint();
+        float fontSize = paint.getTextSize();
+        float indent = 0;
         if (0 == start || characterUtils.isNewline(text.charAt(start - 1))) {
-            lineIndent = fontSize * getIndent();
+            indent = fontSize * getIndent();
         }
-        float layoutSize = getVertical() ? getHeight() : getWidth();
-        float trySize = layoutSize * 1.3f;
-        ArrayList<GSLayoutGlyph> tryGlyphs = layoutUtils.glyphsForSimpleLayout(text.toString(), getPaint(), start, text.length(), trySize, getVertical());
-        compressGlyphs(tryGlyphs, lineIndent);
-        int breakPos = breakPosForGlyphs(tryGlyphs, layoutSize);
-        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>(tryGlyphs.subList(0, breakPos));
+        float size = getVertical() ? getHeight() : getWidth();
+        int count = layoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
+        LinkedList<GSLayoutGlyph> glyphs;
+        if (getVertical()) {
+            text = characterUtils.replaceTextForVertical(text);
+            glyphs = layoutUtils.getVertGlyphs(text, paint, start, count, indent);
+        } else {
+            glyphs = layoutUtils.getHoriGlyphs(text, paint, start, count, indent);
+        }
+        compressGlyphs(glyphs);
+        int breakPos = breakPosForGlyphs(glyphs, size);
+        glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
         adjustEndGlyphs(glyphs);
-        PointF origin = adjustGlyphs(glyphs, layoutSize);
+        PointF origin = adjustGlyphs(glyphs, size);
         if (getVertical()) {
             return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
@@ -206,9 +206,9 @@ public class GSSimpleLayout extends GSLayout {
         }
     }
 
-    private void compressGlyphs(ArrayList<GSLayoutGlyph> glyphs, float indent) {
+    private void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
         float fontSize = getPaint().getTextSize();
-        float move = indent;
+        float move = 0;
         GSLayoutGlyph prevGlyph = null;
         for (GSLayoutGlyph thisGlyph : glyphs) {
             char code = thisGlyph.code();

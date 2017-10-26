@@ -56,13 +56,15 @@ public class GSTextView extends View {
         if (text != null) {
             GSSimpleLayout.Builder builder = GSSimpleLayout.Builder.obtain(paint)
                     .setFontSize(36)
+                    .setWidth(getWidth())
+                    .setHeight(getHeight())
                     .setIndent(2)
                     .setPunctuationCompressRate(punctuationCompressRate)
                     .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                     .setLineSpacing(0.2f)
                     .setParagraphSpacing(0.4f)
                     .setVertical(vertical);
-            layout = builder.build(text, 0, text.length(), getWidth(), getHeight());
+            layout = builder.build(text);
         }
     }
 

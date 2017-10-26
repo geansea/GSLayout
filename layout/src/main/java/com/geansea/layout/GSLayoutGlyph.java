@@ -27,7 +27,7 @@ public class GSLayoutGlyph {
     }
 
     boolean isFullWidth() {
-        return (width > paint.getTextSize() * 0.9);
+        return (width >= paint.getTextSize());
     }
 
     RectF getRect() {
