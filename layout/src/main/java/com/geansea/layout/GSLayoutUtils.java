@@ -16,6 +16,43 @@ final class GSLayoutUtils {
         this.characterUtils = characterUtils;
     }
 
+    int breakText(CharSequence text, TextPaint paint, int start, int end, float size) {
+        int count = 0;
+        if (text instanceof String) {
+            count = paint.breakText(text, start, end, true, size, null);
+        } else if (text instanceof Spanned) {
+            Spanned spanned = (Spanned) text;
+            float measured = 0;
+            int spanStart = start;
+            while (spanStart < end) {
+                int spanEnd = spanned.nextSpanTransition(spanStart, end, MetricAffectingSpan.class);
+                float[] spanMeasured = new float[1];
+                TextPaint spanPaint = paint;
+                MetricAffectingSpan[] spans = spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
+                if (spans != null && spans.length > 0) {
+                    spanPaint = new TextPaint(paint);
+                    for (MetricAffectingSpan span : spans) {
+                        span.updateMeasureState(spanPaint);
+                    }
+                }
+                int spanCount = spanPaint.breakText(spanned, spanStart, spanEnd, true, size - measured, spanMeasured);
+                count += spanCount;
+                if (spanStart + spanCount < spanEnd) {
+                    break;
+                }
+                measured += spanMeasured[0];
+                spanStart = spanEnd;
+            }
+        }
+        for (int pos = start; pos < Math.min(start + count + 1, end); ++pos) {
+            if (characterUtils.isNewline(text.charAt(pos))) {
+                count = pos - start + 1;
+                break;
+            }
+        }
+        return Math.max(count, 1);
+    }
+
     ArrayList<GSLayoutGlyph> glyphsForSimpleLayout(
             String text,
             TextPaint paint,
