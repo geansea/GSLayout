@@ -1,6 +1,7 @@
 package com.geansea.layout;
 
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -46,22 +47,24 @@ public class GSSpannedLayout extends GSLayout {
         float lineTop = 0;
         while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
-            line.origin.y = lineTop + line.ascent;
-            lineTop = line.origin.y + line.descent;
+            PointF lineOrigin = line.getOrigin();
+            RectF lineRect = line.getUsedRect();
+            lineOrigin.y = lineTop - lineRect.top;
+            lineTop = lineOrigin.y + lineRect.bottom;
             if (lineTop > getHeight()) {
                 break;
             }
             lines.add(line);
-            lineLocation = line.end;
-            maxWidth = Math.max(maxWidth, line.size);
+            lineLocation = line.getEnd();
+            maxWidth = Math.max(maxWidth, lineRect.width());
             lineTop += fontSize * getParameters().lineSpacing;
-            if (characterUtils.isNewline(line.glyphs.get(line.glyphs.size() - 1).code())) {
+            if (characterUtils.isNewline(line.getLastGlyph().code())) {
                 lineTop += fontSize * getParameters().paragraphSpacing;
             }
         }
         if (lines.size() > 0) {
             GSLayoutLine last = lines.getLast();
-            setEnd(last.end);
+            setEnd(last.getEnd());
             setUsedWidth(maxWidth);
             setUsedHeight(last.getUsedRect().bottom);
         }
@@ -76,22 +79,24 @@ public class GSSpannedLayout extends GSLayout {
         float lineRight = getWidth();
         while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
-            line.origin.x = lineRight - line.ascent;
-            lineRight = line.origin.x - line.descent;
+            PointF lineOrigin = line.getOrigin();
+            RectF lineRect = line.getUsedRect();
+            lineOrigin.x = lineRight - lineRect.right;
+            lineRight = lineOrigin.x + lineRect.left;
             if (lineRight < 0) {
                 break;
             }
             lines.add(line);
-            lineLocation = line.end;
-            maxHeight = Math.max(maxHeight, line.size);
+            lineLocation = line.getEnd();
+            maxHeight = Math.max(maxHeight, lineRect.height());
             lineRight -= fontSize * getParameters().lineSpacing;
-            if (characterUtils.isNewline(line.glyphs.get(line.glyphs.size() - 1).code())) {
+            if (characterUtils.isNewline(line.getLastGlyph().code())) {
                 lineRight -= fontSize * getParameters().paragraphSpacing;
             }
         }
         if (lines.size() > 0) {
             GSLayoutLine last = lines.getLast();
-            setEnd(last.end);
+            setEnd(last.getEnd());
             setUsedWidth(getWidth() - last.getUsedRect().left);
             setUsedHeight(maxHeight);
         }

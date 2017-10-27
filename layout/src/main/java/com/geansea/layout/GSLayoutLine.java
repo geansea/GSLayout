@@ -5,11 +5,19 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
 public class GSLayoutLine {
     public CharSequence getText() {
         return text;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
     }
 
     public PointF getOrigin() {
@@ -28,7 +36,7 @@ public class GSLayoutLine {
         return new ArrayList<>(glyphs);
     }
 
-    void draw(Canvas canvas) {
+    public void draw(Canvas canvas) {
         for (GSLayoutGlyph glyph : glyphs) {
             float glyphX = Math.round(origin.x + glyph.x);
             float glyphY = Math.round(origin.y + glyph.y);
@@ -44,17 +52,24 @@ public class GSLayoutLine {
         }
     }
 
+    GSLayoutGlyph getLastGlyph() {
+        if (glyphs == null || glyphs.size() == 0) {
+            return null;
+        }
+        return glyphs.getLast();
+    }
+
     private CharSequence text;
     private int start;
-    int end;
-    List<GSLayoutGlyph> glyphs;
-    PointF origin;
-    float ascent;
-    float descent;
-    float size;
+    private int end;
+    private LinkedList<GSLayoutGlyph> glyphs;
+    private PointF origin;
+    private float ascent;
+    private float descent;
+    private float size;
     private boolean vertical;
 
-    static GSLayoutLine createHorizontalLine(CharSequence text, List<GSLayoutGlyph> glyphs, PointF origin) {
+    static GSLayoutLine createHorizontalLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin) {
         GSLayoutLine line = new GSLayoutLine();
         if (glyphs.size() > 0) {
             GSLayoutGlyph first = glyphs.get(0);
@@ -63,7 +78,7 @@ public class GSLayoutLine {
             line.end = last.end;
             line.size = last.getUsedRect().right;
             line.text = text.subSequence(line.start, line.end);
-            line.glyphs = new ArrayList<>(glyphs);
+            line.glyphs = glyphs;
             for (GSLayoutGlyph glyph : glyphs) {
                 line.ascent = Math.max(line.ascent, glyph.ascent);
                 line.descent = Math.max(line.descent, glyph.descent);
@@ -74,7 +89,7 @@ public class GSLayoutLine {
         return line;
     }
 
-    static GSLayoutLine createVerticalLine(CharSequence text, List<GSLayoutGlyph> glyphs, PointF origin) {
+    static GSLayoutLine createVerticalLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin) {
         GSLayoutLine line = new GSLayoutLine();
         if (glyphs.size() > 0) {
             GSLayoutGlyph first = glyphs.get(0);
@@ -83,7 +98,7 @@ public class GSLayoutLine {
             line.end = last.end;
             line.size = last.getUsedRect().bottom;
             line.text = text.subSequence(line.start, line.end);
-            line.glyphs = new ArrayList<>(glyphs);
+            line.glyphs = glyphs;
             for (GSLayoutGlyph glyph : glyphs) {
                 line.ascent = Math.max(line.ascent, glyph.getUsedRect().right);
                 line.descent = Math.max(line.descent, -glyph.getUsedRect().left);
