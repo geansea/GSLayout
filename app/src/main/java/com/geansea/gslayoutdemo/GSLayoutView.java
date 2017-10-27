@@ -4,25 +4,75 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
+import android.text.Spanned;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.geansea.layout.GSLayout;
 import com.geansea.layout.GSLayoutGlyph;
 import com.geansea.layout.GSLayoutLine;
+import com.geansea.layout.GSSimpleLayout;
+import com.geansea.layout.GSSpannedLayout;
 
 import java.util.ArrayList;
 
-abstract class GSLayoutView extends View {
+class GSLayoutView extends View {
     private GSLayout.Parameters parameters;
     private CharSequence text;
+    private boolean complexMode;
     private ArrayList<GSLayoutLine> lines;
     private boolean drawHelpingLine;
 
     public GSLayoutView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        TextPaint paint = new TextPaint();
+        paint.setAntiAlias(true);
+        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/SourceHanSerifCN-Light.otf"));
+        parameters = GSLayout.Parameters.obtain(paint)
+                .setFontSize(36)
+                .setIndent(2)
+                .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
+                .setLineSpacing(0.2f)
+                .setParagraphSpacing(0.4f);
+    }
+
+    public void setText(CharSequence text) {
+        this.text = text;
+        requestLayout();
+    }
+
+    public void setComplexMode(boolean complexMode) {
+        this.complexMode = complexMode;
+        requestLayout();
+    }
+
+    public void setPunctuationCompressRate(float punctuationCompressRate) {
+        parameters.setPunctuationCompressRate(punctuationCompressRate);
+        requestLayout();
+    }
+
+    public void setVertical(boolean vertical) {
+        parameters.setVertical(vertical);
+        requestLayout();
+    }
+
+    public void setDrawHelpingLine(boolean drawHelpingLine) {
+        this.drawHelpingLine = drawHelpingLine;
+        invalidate();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (complexMode) {
+            lines = layoutComplexLines(getWidth(), getHeight());
+        } else {
+            lines = layoutLines(getWidth(), getHeight(), 0);
+        }
     }
 
     @Override
@@ -37,6 +87,22 @@ abstract class GSLayoutView extends View {
         if (drawHelpingLine) {
             drawHelpingLines(canvas);
         }
+    }
+
+    private ArrayList<GSLayoutLine> layoutLines(int width, int height, int start) {
+        parameters.setWidth(width).setHeight(height);
+        if (text instanceof String) {
+            GSSimpleLayout layout = GSSimpleLayout.build((String) text, start, text.length(), parameters);
+            return layout.getLines();
+        } else if (text instanceof Spanned) {
+            GSSpannedLayout layout = GSSpannedLayout.build((Spanned) text, start, text.length(), parameters);
+            return layout.getLines();
+        }
+        return null;
+    }
+
+    private ArrayList<GSLayoutLine> layoutComplexLines(int width, int height) {
+        return null;
     }
 
     private void drawHelpingLines(Canvas canvas) {

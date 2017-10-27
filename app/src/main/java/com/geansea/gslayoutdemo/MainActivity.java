@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String mTestText;
+    private String mTestStringText;
+    private Spanned mTestSpannedText;
 
     private GSTextView mTextMessage;
     private CheckBox mHelpingLineCheckBox;
@@ -23,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_pure_text:
-                    mTextMessage.setText(mTestText);
+                    mTextMessage.setText(mTestStringText);
                     return true;
                 case R.id.navigation_rich_text:
                     return true;
@@ -38,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
             = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            if (mTextMessage == null) {
+                return;
+            }
             if (buttonView == mHelpingLineCheckBox) {
                 mTextMessage.setDrawHelpingLine(isChecked);
             } else if (buttonView == mVerticalCheckBox) {
@@ -53,13 +59,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTestText = "The quick brown fox jumps over the lazy dog.\n" +
+        mTestStringText =
+                "The quick brown fox jumps over the lazy dog.\n" +
                 "Ligature test: ff ffi ffl fi fl ft\n" +
                 "中国网：“中国访谈 世界对话”，欢迎您的收看。" +
                 "中国共产党第十九次全国代表大会于2017年10月18日上午9时在北京人民大会堂开幕。" +
                 "习近平总书记代表十八届中央委员会向大会作报告。为更全面更深入地理解报告的内容，" +
                 "《中国访谈》节目组特别邀请中国人民大学高校哲学社会科学发展战略研究中心研究员韩宇博士对十九大报告进行解读。\n" +
                 "Emoji support: \u2766\uD83D\uDC8C\uD83D\uDE02";
+
+        mTestSpannedText = Html.fromHtml("");
 
         mTextMessage = (GSTextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
