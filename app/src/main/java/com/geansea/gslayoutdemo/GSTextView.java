@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.support.annotation.Nullable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -21,7 +22,7 @@ public class GSTextView extends View {
     private GSSimpleLayout layout;
     private boolean drawHelpingLine;
 
-    public GSTextView(Context context, AttributeSet attrs) {
+    public GSTextView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);

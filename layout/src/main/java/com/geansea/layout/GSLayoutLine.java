@@ -8,6 +8,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class GSLayoutLine {
+    private CharSequence text;
+    private int start;
+    private int end;
+    private LinkedList<GSLayoutGlyph> glyphs;
+    private PointF origin;
+    private float ascent;
+    private float descent;
+    private float size;
+    private boolean vertical;
+
     public CharSequence getText() {
         return text;
     }
@@ -52,23 +62,6 @@ public class GSLayoutLine {
         }
     }
 
-    GSLayoutGlyph getLastGlyph() {
-        if (glyphs == null || glyphs.size() == 0) {
-            return null;
-        }
-        return glyphs.getLast();
-    }
-
-    private CharSequence text;
-    private int start;
-    private int end;
-    private LinkedList<GSLayoutGlyph> glyphs;
-    private PointF origin;
-    private float ascent;
-    private float descent;
-    private float size;
-    private boolean vertical;
-
     static GSLayoutLine createHorizontalLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin) {
         GSLayoutLine line = new GSLayoutLine();
         if (glyphs.size() > 0) {
@@ -107,6 +100,13 @@ public class GSLayoutLine {
             line.vertical = true;
         }
         return line;
+    }
+
+    GSLayoutGlyph getLastGlyph() {
+        if (glyphs == null || glyphs.size() == 0) {
+            return null;
+        }
+        return glyphs.getLast();
     }
 
     private GSLayoutLine() {
