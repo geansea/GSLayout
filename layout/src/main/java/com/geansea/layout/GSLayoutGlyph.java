@@ -30,6 +30,10 @@ public class GSLayoutGlyph {
         return (width >= paint.getTextSize());
     }
 
+    boolean isItalic() {
+        return paint.getTypeface().isItalic();
+    }
+
     RectF getRect() {
         if (rotateForVertical) {
             return new RectF(x - descent, y, x + ascent, y + width);

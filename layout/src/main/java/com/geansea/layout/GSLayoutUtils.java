@@ -175,4 +175,52 @@ final class GSLayoutUtils {
         }
         return glyphs;
     }
+
+    void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Parameters parameters) {
+        float move = 0;
+        GSLayoutGlyph glyph0 = null;
+        for (GSLayoutGlyph glyph1 : glyphs) {
+            // Add gap
+            if (characterUtils.shouldAddGap(glyph0, glyph1)) {
+                move += parameters.getFontSize() / 6;
+            }
+            // Punctuation compress
+            if (characterUtils.shouldCompressStart(glyph1)) {
+                if (glyph0 == null && characterUtils.canCompress(glyph1)) {
+                    glyph1.compressLeft = glyph1.width * parameters.punctuationCompressRate;
+                    move -= glyph1.compressLeft;
+                }
+                if (characterUtils.shouldCompressEnd(glyph0)) {
+                    if (characterUtils.canCompress(glyph1)) {
+                        glyph1.compressLeft = glyph1.width * parameters.punctuationCompressRate / 2;
+                        move -= glyph1.compressLeft;
+                    }
+                    if (characterUtils.canCompress(glyph0)) {
+                        glyph0.compressRight = glyph0.width * parameters.punctuationCompressRate / 2;
+                        move -= glyph0.compressRight;
+                    }
+                }
+            }
+            if (characterUtils.shouldCompressEnd(glyph1)) {
+                if (characterUtils.shouldCompressEnd(glyph0)) {
+                    if (characterUtils.canCompress(glyph0)) {
+                        glyph0.compressRight = glyph0.width * parameters.punctuationCompressRate / 2;
+                        move -= glyph0.compressRight;
+                    }
+                }
+            }
+            // Move
+            if (parameters.vertical) {
+                glyph1.y += move;
+            } else {
+                glyph1.x += move;
+            }
+            // Fix CRLF width
+            if (characterUtils.isNewline(glyph1.code())) {
+                glyph1.compressRight = glyph1.width;
+                move -= glyph1.width;
+            }
+            glyph0 = glyph1;
+        }
+    }
 }

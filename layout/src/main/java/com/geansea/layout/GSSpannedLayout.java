@@ -119,7 +119,8 @@ public class GSSpannedLayout extends GSLayout {
         } else {
             glyphs = layoutUtils.getHoriGlyphs(text, paint, start, count, indent);
         }
-        compressGlyphs(glyphs);
+        layoutUtils.compressGlyphs(glyphs, getParameters());
+        //compressGlyphs(glyphs);
         int breakPos = breakPosForGlyphs(glyphs, size);
         glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
         adjustEndGlyphs(glyphs);
@@ -128,59 +129,6 @@ public class GSSpannedLayout extends GSLayout {
             return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
             return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
-        }
-    }
-
-    private void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
-        float fontSize = getParameters().getFontSize();
-        float move = 0;
-        GSLayoutGlyph prevGlyph = null;
-        for (GSLayoutGlyph thisGlyph : glyphs) {
-            char code = thisGlyph.code();
-            char prevCode = (prevGlyph != null) ? prevGlyph.code() : 0;
-            // Add gap
-            if (characterUtils.shouldAddGap(prevCode, code)) {
-                move += fontSize / 6;
-            }
-            // Punctuation compress
-            if (characterUtils.canCompressLeft(code)) {
-                if (0 == prevCode) {
-                    if (thisGlyph.isFullWidth()) {
-                        thisGlyph.compressLeft = thisGlyph.width * getParameters().punctuationCompressRate;
-                        move -= thisGlyph.compressLeft;
-                    }
-                }
-                if (characterUtils.canCompressRight(prevCode)) {
-                    if (thisGlyph.isFullWidth()) {
-                        thisGlyph.compressLeft = thisGlyph.width * getParameters().punctuationCompressRate / 2;
-                        move -= thisGlyph.compressLeft;
-                    }
-                    if (prevGlyph != null && prevGlyph.isFullWidth()) {
-                        prevGlyph.compressRight = prevGlyph.width * getParameters().punctuationCompressRate / 2;
-                        move -= prevGlyph.compressRight;
-                    }
-                }
-            }
-            if (characterUtils.canCompressRight(code)) {
-                if (characterUtils.canCompressRight(prevCode)) {
-                    if (prevGlyph != null && prevGlyph.isFullWidth()) {
-                        prevGlyph.compressRight = prevGlyph.width * getParameters().punctuationCompressRate / 2;
-                        move -= prevGlyph.compressRight;
-                    }
-                }
-            }
-            // Move
-            if (getParameters().vertical) {
-                thisGlyph.y += move;
-            } else {
-                thisGlyph.x += move;
-            }
-            // Fix CRLF width
-            if (characterUtils.isNewline(code)) {
-                move -= thisGlyph.width;
-                thisGlyph.compressRight = thisGlyph.width;
-            }
-            prevGlyph = thisGlyph;
         }
     }
 

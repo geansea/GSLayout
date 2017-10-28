@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
+@SuppressWarnings({"SimplifiableIfStatement", "RedundantIfStatement"})
 final class GSCharacterUtils {
     private HashSet<Character> compressLeftSet;
     private HashSet<Character> compressRightSet;
@@ -51,6 +52,10 @@ final class GSCharacterUtils {
                 '\uFE10', // ，
                 '\uFE11', // 、
                 '\uFE12', // 。
+                '\uFE13', // ：
+                '\uFE14', // ；
+                '\uFE15', // ！
+                '\uFE16', // ？
         }));
         notLineBeginSet = new HashSet<>(Arrays.asList(new Character[]{
                 '!',
@@ -114,7 +119,7 @@ final class GSCharacterUtils {
     }
 
     boolean isNewline(char code) {
-        return ('\r' == code || '\n' == code);
+        return code == '\r' || code == '\n';
     }
 
     boolean shouldAddGap(char prevCode, char code) {
@@ -123,8 +128,54 @@ final class GSCharacterUtils {
                 ('%' == prevCode && isCjk(code));
     }
 
+    boolean shouldAddGap(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
+        if (glyph0 == null || glyph1 == null) {
+            return false;
+        }
+        char code0 = glyph0.code();
+        char code1 = glyph1.code();
+        if (glyph0.isItalic() && !glyph1.isItalic() && code1 != ' ') {
+            return true;
+        }
+        if (isCjk(code0)) {
+            return isAlphaDigit(code1);
+        }
+        if (isCjk(code1)) {
+            return isAlphaDigit(code0) || code0 == '%';
+        }
+        return false;
+    }
+
     boolean canCompressLeft(char code) {
         return compressLeftSet.contains(code);
+    }
+
+    boolean canCompress(GSLayoutGlyph glyph) {
+        if (glyph == null) {
+            return false;
+        }
+        if (!glyph.isFullWidth()) {
+            return false;
+        }
+        char code = glyph.code();
+        if ('\uFE13' <= code && code <= '\uFE16') {
+            return false;
+        }
+        return true;
+    }
+
+    boolean shouldCompressStart(GSLayoutGlyph glyph) {
+        if (glyph == null) {
+            return false;
+        }
+        return compressLeftSet.contains(glyph.code());
+    }
+
+    boolean shouldCompressEnd(GSLayoutGlyph glyph) {
+        if (glyph == null) {
+            return false;
+        }
+        return compressRightSet.contains(glyph.code());
     }
 
     boolean canCompressRight(char code) {
