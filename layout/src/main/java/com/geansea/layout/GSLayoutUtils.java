@@ -216,7 +216,7 @@ final class GSLayoutUtils {
                 glyph1.x += move;
             }
             // Fix CRLF width
-            if (characterUtils.isNewline(glyph1.code())) {
+            if (characterUtils.isNewline(glyph1)) {
                 glyph1.compressRight = glyph1.width;
                 move -= glyph1.width;
             }

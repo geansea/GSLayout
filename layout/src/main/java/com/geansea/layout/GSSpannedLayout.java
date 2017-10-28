@@ -58,7 +58,7 @@ public class GSSpannedLayout extends GSLayout {
             lineLocation = line.getEnd();
             maxWidth = Math.max(maxWidth, lineRect.width());
             lineTop += fontSize * getParameters().lineSpacing;
-            if (characterUtils.isNewline(line.getLastGlyph().code())) {
+            if (characterUtils.isNewline(line.getLastGlyph())) {
                 lineTop += fontSize * getParameters().paragraphSpacing;
             }
         }
@@ -90,7 +90,7 @@ public class GSSpannedLayout extends GSLayout {
             lineLocation = line.getEnd();
             maxHeight = Math.max(maxHeight, lineRect.height());
             lineRight -= fontSize * getParameters().lineSpacing;
-            if (characterUtils.isNewline(line.getLastGlyph().code())) {
+            if (characterUtils.isNewline(line.getLastGlyph())) {
                 lineRight -= fontSize * getParameters().paragraphSpacing;
             }
         }
@@ -175,7 +175,7 @@ public class GSSpannedLayout extends GSLayout {
         int count = glyphs.size();
         GSLayoutGlyph lastGlyph = glyphs.get(count - 1);
         GSLayoutGlyph crlfGlyph = null;
-        if (characterUtils.isNewline(lastGlyph.code())) {
+        if (characterUtils.isNewline(lastGlyph)) {
             crlfGlyph = lastGlyph;
             if (count > 1) {
                 lastGlyph = glyphs.get(count - 2);
@@ -199,7 +199,7 @@ public class GSSpannedLayout extends GSLayout {
     private PointF adjustGlyphs(List<GSLayoutGlyph> glyphs, float width) {
         PointF origin = new PointF();
         GSLayoutGlyph lastGlyph = glyphs.get(glyphs.size() - 1);
-        boolean reachEnd = characterUtils.isNewline(lastGlyph.code());
+        boolean reachEnd = characterUtils.isNewline(lastGlyph);
         if (lastGlyph.end == getText().length()) {
             reachEnd = true;
         }

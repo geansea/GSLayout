@@ -122,6 +122,10 @@ final class GSCharacterUtils {
         return code == '\r' || code == '\n';
     }
 
+    boolean isNewline(GSLayoutGlyph glyph) {
+        return glyph != null && isNewline(glyph.code());
+    }
+
     boolean shouldAddGap(char prevCode, char code) {
         return (isAlphaDigit(prevCode) && isCjk(code)) ||
                 (isCjk(prevCode) && isAlphaDigit(code)) ||
