@@ -2,6 +2,7 @@ package com.geansea.layout;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.text.TextPaint;
 
@@ -35,6 +36,11 @@ public abstract class GSLayout {
             this.paint = paint;
             alignment = Alignment.ALIGN_NORMAL;
             punctuationCompressRate = 1;
+        }
+
+        public Parameters setTypeface(Typeface typeface) {
+            paint.setTypeface(typeface);
+            return this;
         }
 
         public Parameters setFontSize(float fontSize) {

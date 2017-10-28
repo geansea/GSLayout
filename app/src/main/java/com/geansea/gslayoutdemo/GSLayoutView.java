@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
@@ -32,9 +31,7 @@ class GSLayoutView extends View {
         super(context, attrs);
         TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);
-        paint.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/SourceHanSerifCN-Light.otf"));
         parameters = GSLayout.Parameters.obtain(paint)
-                .setFontSize(36)
                 .setIndent(2)
                 .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                 .setLineSpacing(0.2f)
@@ -48,6 +45,16 @@ class GSLayoutView extends View {
 
     public void setComplexMode(boolean complexMode) {
         this.complexMode = complexMode;
+        requestLayout();
+    }
+
+    public void setTypeface(Typeface typeface) {
+        parameters.setTypeface(typeface);
+        requestLayout();
+    }
+
+    public void setFontSize(float fontSize) {
+        parameters.setFontSize(fontSize);
         requestLayout();
     }
 

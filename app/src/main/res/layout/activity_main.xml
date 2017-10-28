@@ -14,7 +14,7 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <com.geansea.gslayoutdemo.GSTextView
+        <com.geansea.gslayoutdemo.GSLayoutView
             android:id="@+id/message"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -38,23 +38,92 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="辅助线" />
+                android:text="@string/helping_line" />
 
             <CheckBox
-                android:id="@+id/vertical"
+                android:id="@+id/vertical_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="竖排版" />
+                android:text="@string/vertical_layout" />
 
             <CheckBox
                 android:id="@+id/punctuation_compress"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="标点压缩" />
+                android:text="@string/punctuation_compress" />
         </TableRow>
 
+        <RadioGroup
+            android:id="@+id/font_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/system_font"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/system_font" />
+
+            <RadioButton
+                android:id="@+id/source_han_sans_font"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/source_han_sans_font" />
+
+            <RadioButton
+                android:id="@+id/source_han_serif_font"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/source_han_serif_font" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/font_size_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/font_size_smallest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/font_size_smallest" />
+
+            <RadioButton
+                android:id="@+id/font_size_small"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/font_size_small" />
+
+            <RadioButton
+                android:id="@+id/font_size_middle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/font_size_middle" />
+
+            <RadioButton
+                android:id="@+id/font_size_large"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/font_size_large" />
+
+            <RadioButton
+                android:id="@+id/font_size_largest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/font_size_largest" />
+        </RadioGroup>
     </TableLayout>
 
     <android.support.design.widget.BottomNavigationView
