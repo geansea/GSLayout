@@ -1,6 +1,5 @@
 package com.geansea.layout;
 
-import android.graphics.PointF;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.CharacterStyle;

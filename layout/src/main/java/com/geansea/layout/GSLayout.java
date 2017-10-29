@@ -4,14 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.text.Layout;
 import android.text.TextPaint;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
-public abstract class GSLayout {
+public class GSLayout {
     public enum Alignment {
         ALIGN_NORMAL,
         ALIGN_OPPOSITE,
@@ -85,16 +83,19 @@ public abstract class GSLayout {
             return this;
         }
 
-        public Layout build(CharSequence text, int start, int end) {
+        public GSLayout build(CharSequence text, int start, int end) {
             start = Math.max(start, 0);
             end = Math.min(end, text.length());
             if (start >= end) {
                 return null;
             }
-            //GSSpannedLayout layout = new GSSpannedLayout(text, start, end, parameters);
-            //layout.doLayout();
-            //return layout;
-            return null;
+            GSLayout layout = new GSLayout(this, text, start, end);
+            if (vertical) {
+                layout.doVerticalLayout();
+            } else {
+                layout.doHorizontalLayout();
+            }
+            return layout;
         }
 
         float getFontSize() {
@@ -108,13 +109,17 @@ public abstract class GSLayout {
         }
     }
 
-    private CharSequence text;
-    private int start;
+    private static final float SIZE_EXTEND_TIMES = 1.3f;
+
+    private final Builder builder;
+    private final GSCharacterUtils charUtils;
+    private final GSLayoutUtils layoutUtils;
+    private final CharSequence text;
+    private final int start;
     private int end;
-    private Builder builder;
     private float usedWidth;
     private float usedHeight;
-    private List<GSLayoutLine> lines;
+    private LinkedList<GSLayoutLine> lines;
 
     public CharSequence getText() {
         return text;
@@ -168,11 +173,13 @@ public abstract class GSLayout {
         }
     }
 
-    GSLayout(CharSequence text, int start, int end, Builder builder) {
+    GSLayout(Builder builder, CharSequence text, int start, int end) {
+        this.builder = builder;
+        charUtils = builder.charUtils;
+        layoutUtils = new GSLayoutUtils(charUtils);
         this.text = text;
         this.start = start;
         this.end = end;
-        this.builder = builder;
     }
 
     void setEnd(int end) {
@@ -181,6 +188,100 @@ public abstract class GSLayout {
 
     Builder getBuilder() {
         return builder;
+    }
+
+    private void doHorizontalLayout() {
+        LinkedList<GSLayoutLine> lines = new LinkedList<>();
+        float fontSize = getBuilder().getFontSize();
+        int lineLocation = getStart();
+        float maxWidth = 0;
+        float lineTop = 0;
+        while (lineLocation < getText().length()) {
+            GSLayoutLine line = layoutLine(lineLocation);
+            PointF lineOrigin = line.getOrigin();
+            RectF lineRect = line.getUsedRect();
+            lineOrigin.y = lineTop - lineRect.top;
+            lineTop = lineOrigin.y + lineRect.bottom;
+            if (lineTop > getHeight()) {
+                break;
+            }
+            lines.add(line);
+            lineLocation = line.getEnd();
+            maxWidth = Math.max(maxWidth, lineRect.width());
+            lineTop += fontSize * getBuilder().lineSpacing;
+            if (charUtils.isNewline(line.getLastGlyph())) {
+                lineTop += fontSize * getBuilder().paragraphSpacing;
+            }
+        }
+        if (lines.size() > 0) {
+            GSLayoutLine last = lines.getLast();
+            RectF lastRect = last.getUsedRect();
+            setEnd(last.getEnd());
+            setUsedWidth(maxWidth);
+            setUsedHeight(lastRect.bottom);
+        }
+        this.lines = lines;
+    }
+
+    private void doVerticalLayout() {
+        LinkedList<GSLayoutLine> lines = new LinkedList<>();
+        float fontSize = getBuilder().getFontSize();
+        int lineLocation = getStart();
+        float maxHeight = 0;
+        float lineRight = getWidth();
+        while (lineLocation < getText().length()) {
+            GSLayoutLine line = layoutLine(lineLocation);
+            PointF lineOrigin = line.getOrigin();
+            RectF lineRect = line.getUsedRect();
+            lineOrigin.x = lineRight - lineRect.right;
+            lineRight = lineOrigin.x + lineRect.left;
+            if (lineRight < 0) {
+                break;
+            }
+            lines.add(line);
+            lineLocation = line.getEnd();
+            maxHeight = Math.max(maxHeight, lineRect.height());
+            lineRight -= fontSize * getBuilder().lineSpacing;
+            if (charUtils.isNewline(line.getLastGlyph())) {
+                lineRight -= fontSize * getBuilder().paragraphSpacing;
+            }
+        }
+        if (lines.size() > 0) {
+            GSLayoutLine last = lines.getLast();
+            RectF lastRect = last.getUsedRect();
+            setEnd(last.getEnd());
+            setUsedWidth(getWidth() - lastRect.left);
+            setUsedHeight(maxHeight);
+        }
+        this.lines = lines;
+    }
+
+    private GSLayoutLine layoutLine(int start) {
+        String text = getText().toString();
+        TextPaint paint = getBuilder().paint;
+        float fontSize = getBuilder().getFontSize();
+        float indent = 0;
+        if (0 == start || charUtils.isNewline(text.charAt(start - 1))) {
+            indent = fontSize * getBuilder().indent;
+        }
+        float size = getBuilder().vertical ? getHeight() : getWidth();
+        int count = layoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
+        LinkedList<GSLayoutGlyph> glyphs;
+        if (builder.vertical) {
+            glyphs = layoutUtils.getVerticalGlyphs(text, paint, start, count, indent);
+        } else {
+            glyphs = layoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
+        }
+        compressGlyphs(glyphs);
+        int breakPos = breakGlyphs(glyphs, size);
+        glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
+        adjustEndGlyphs(glyphs);
+        PointF origin = adjustGlyphs(glyphs, text.length(), size);
+        if (builder.vertical) {
+            return GSLayoutLine.createVerticalLine(text, glyphs, origin);
+        } else {
+            return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
+        }
     }
 
     void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
@@ -357,9 +458,5 @@ public abstract class GSLayout {
 
     void setUsedHeight(float usedHeight) {
         this.usedHeight = usedHeight;
-    }
-
-    void setLines(List<GSLayoutLine> lines) {
-        this.lines = lines;
     }
 }

@@ -6,8 +6,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.support.annotation.Nullable;
-import android.text.Spanned;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -15,8 +13,6 @@ import android.view.View;
 import com.geansea.layout.GSLayout;
 import com.geansea.layout.GSLayoutGlyph;
 import com.geansea.layout.GSLayoutLine;
-import com.geansea.layout.GSSimpleLayout;
-import com.geansea.layout.GSSpannedLayout;
 
 import java.util.ArrayList;
 
@@ -27,7 +23,7 @@ class GSLayoutView extends View {
     private ArrayList<GSLayoutLine> lines;
     private boolean drawHelpingLine;
 
-    public GSLayoutView(Context context, @Nullable AttributeSet attrs) {
+    public GSLayoutView(Context context, AttributeSet attrs) {
         super(context, attrs);
         TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);
@@ -98,18 +94,8 @@ class GSLayoutView extends View {
 
     private ArrayList<GSLayoutLine> layoutLines(int width, int height, int start) {
         builder.setWidth(width).setHeight(height);
-        if (text instanceof String) {
-            GSSimpleLayout layout = GSSimpleLayout.build((String) text, start, text.length(), builder);
-            if (layout != null) {
-                return layout.getLines();
-            }
-        } else if (text instanceof Spanned) {
-            GSSpannedLayout layout = GSSpannedLayout.build((Spanned) text, start, text.length(), builder);
-            if (layout != null) {
-                return layout.getLines();
-            }
-        }
-        return null;
+        GSLayout layout = builder.build(text, start, text.length());
+        return layout != null ? layout.getLines() : null;
     }
 
     private ArrayList<GSLayoutLine> layoutComplexLines(int width, int height) {
