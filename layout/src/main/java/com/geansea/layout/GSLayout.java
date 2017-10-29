@@ -27,7 +27,6 @@ public class GSLayout {
         float lineSpacing;
         float paragraphSpacing;
         boolean vertical;
-        final GSCharacterUtils charUtils;
 
         public static Builder obtain(TextPaint paint) {
             return new Builder(paint);
@@ -105,15 +104,12 @@ public class GSLayout {
         private Builder(TextPaint paint) {
             this.paint = paint;
             alignment = Alignment.ALIGN_NORMAL;
-            charUtils = new GSCharacterUtils();
         }
     }
 
     private static final float SIZE_EXTEND_TIMES = 1.3f;
 
     private final Builder builder;
-    private final GSCharacterUtils charUtils;
-    private final GSLayoutUtils layoutUtils;
     private final CharSequence text;
     private final int start;
     private int end;
@@ -173,26 +169,16 @@ public class GSLayout {
         }
     }
 
-    GSLayout(Builder builder, CharSequence text, int start, int end) {
+    private GSLayout(Builder builder, CharSequence text, int start, int end) {
         this.builder = builder;
-        charUtils = builder.charUtils;
-        layoutUtils = new GSLayoutUtils(charUtils);
         this.text = text;
         this.start = start;
         this.end = end;
     }
 
-    void setEnd(int end) {
-        this.end = end;
-    }
-
-    Builder getBuilder() {
-        return builder;
-    }
-
     private void doHorizontalLayout() {
         LinkedList<GSLayoutLine> lines = new LinkedList<>();
-        float fontSize = getBuilder().getFontSize();
+        float fontSize = builder.getFontSize();
         int lineLocation = getStart();
         float maxWidth = 0;
         float lineTop = 0;
@@ -208,24 +194,24 @@ public class GSLayout {
             lines.add(line);
             lineLocation = line.getEnd();
             maxWidth = Math.max(maxWidth, lineRect.width());
-            lineTop += fontSize * getBuilder().lineSpacing;
-            if (charUtils.isNewline(line.getLastGlyph())) {
-                lineTop += fontSize * getBuilder().paragraphSpacing;
+            lineTop += fontSize * builder.lineSpacing;
+            if (GSCharUtils.isNewline(line.getLastGlyph().code())) {
+                lineTop += fontSize * builder.paragraphSpacing;
             }
         }
         if (lines.size() > 0) {
             GSLayoutLine last = lines.getLast();
             RectF lastRect = last.getUsedRect();
-            setEnd(last.getEnd());
-            setUsedWidth(maxWidth);
-            setUsedHeight(lastRect.bottom);
+            end = last.getEnd();
+            usedWidth = maxWidth;
+            usedHeight = lastRect.bottom;
         }
         this.lines = lines;
     }
 
     private void doVerticalLayout() {
         LinkedList<GSLayoutLine> lines = new LinkedList<>();
-        float fontSize = getBuilder().getFontSize();
+        float fontSize = builder.getFontSize();
         int lineLocation = getStart();
         float maxHeight = 0;
         float lineRight = getWidth();
@@ -241,36 +227,36 @@ public class GSLayout {
             lines.add(line);
             lineLocation = line.getEnd();
             maxHeight = Math.max(maxHeight, lineRect.height());
-            lineRight -= fontSize * getBuilder().lineSpacing;
-            if (charUtils.isNewline(line.getLastGlyph())) {
-                lineRight -= fontSize * getBuilder().paragraphSpacing;
+            lineRight -= fontSize * builder.lineSpacing;
+            if (GSCharUtils.isNewline(line.getLastGlyph().code())) {
+                lineRight -= fontSize * builder.paragraphSpacing;
             }
         }
         if (lines.size() > 0) {
             GSLayoutLine last = lines.getLast();
             RectF lastRect = last.getUsedRect();
-            setEnd(last.getEnd());
-            setUsedWidth(getWidth() - lastRect.left);
-            setUsedHeight(maxHeight);
+            end = last.getEnd();
+            usedWidth = getWidth() - lastRect.left;
+            usedHeight = maxHeight;
         }
         this.lines = lines;
     }
 
     private GSLayoutLine layoutLine(int start) {
         String text = getText().toString();
-        TextPaint paint = getBuilder().paint;
-        float fontSize = getBuilder().getFontSize();
+        TextPaint paint = builder.paint;
+        float fontSize = builder.getFontSize();
         float indent = 0;
-        if (0 == start || charUtils.isNewline(text.charAt(start - 1))) {
-            indent = fontSize * getBuilder().indent;
+        if (0 == start || GSCharUtils.isNewline(text.charAt(start - 1))) {
+            indent = fontSize * builder.indent;
         }
-        float size = getBuilder().vertical ? getHeight() : getWidth();
-        int count = layoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
+        float size = builder.vertical ? getHeight() : getWidth();
+        int count = GSLayoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
         LinkedList<GSLayoutGlyph> glyphs;
         if (builder.vertical) {
-            glyphs = layoutUtils.getVerticalGlyphs(text, paint, start, count, indent);
+            glyphs = GSLayoutUtils.getVerticalGlyphs(text, paint, start, count, indent);
         } else {
-            glyphs = layoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
+            glyphs = GSLayoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
         }
         compressGlyphs(glyphs);
         int breakPos = breakGlyphs(glyphs, size);
@@ -284,37 +270,35 @@ public class GSLayout {
         }
     }
 
-    void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
+    private void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
         float move = 0;
         GSLayoutGlyph glyph0 = null;
         for (GSLayoutGlyph glyph1 : glyphs) {
             // Add gap
-            if (builder.charUtils.shouldAddGap(glyph0, glyph1)) {
+            if (GSCharUtils.shouldAddGap(glyph0, glyph1)) {
                 move += builder.getFontSize() / 6;
             }
             // Punctuation compress
-            if (builder.charUtils.shouldCompressStart(glyph1)) {
-                if (glyph0 == null && builder.charUtils.canCompress(glyph1)) {
+            if (GSCharUtils.shouldCompressStart(glyph1)) {
+                if (glyph0 == null && GSCharUtils.canCompress(glyph1)) {
                     glyph1.compressStart = glyph1.size * builder.punctuationCompressRate;
                     move -= glyph1.compressStart;
                 }
-                if (builder.charUtils.shouldCompressEnd(glyph0)) {
-                    if (builder.charUtils.canCompress(glyph1)) {
+                if (GSCharUtils.shouldCompressEnd(glyph0)) {
+                    if (GSCharUtils.canCompress(glyph1)) {
                         glyph1.compressStart = glyph1.size * builder.punctuationCompressRate / 2;
                         move -= glyph1.compressStart;
                     }
-                    if (builder.charUtils.canCompress(glyph0)) {
+                    if (GSCharUtils.canCompress(glyph0)) {
                         glyph0.compressEnd = glyph0.size * builder.punctuationCompressRate / 2;
                         move -= glyph0.compressEnd;
                     }
                 }
             }
-            if (builder.charUtils.shouldCompressEnd(glyph1)) {
-                if (builder.charUtils.shouldCompressEnd(glyph0)) {
-                    if (builder.charUtils.canCompress(glyph0)) {
+            if (GSCharUtils.shouldCompressEnd(glyph1)) {
+                if (GSCharUtils.shouldCompressEnd(glyph0) && GSCharUtils.canCompress(glyph0)) {
                         glyph0.compressEnd = glyph0.size * builder.punctuationCompressRate / 2;
                         move -= glyph0.compressEnd;
-                    }
                 }
             }
             // Move
@@ -324,7 +308,7 @@ public class GSLayout {
                 glyph1.x += move;
             }
             // Fix CRLF width
-            if (builder.charUtils.isNewline(glyph1)) {
+            if (GSCharUtils.isNewline(glyph1.code())) {
                 glyph1.compressEnd = glyph1.size;
                 move -= glyph1.size;
             }
@@ -332,17 +316,17 @@ public class GSLayout {
         }
     }
 
-    int breakGlyphs(LinkedList<GSLayoutGlyph> glyphs, float size) {
+    private int breakGlyphs(LinkedList<GSLayoutGlyph> glyphs, float size) {
         int breakPos = 0;
         int pos = 0;
         GSLayoutGlyph glyph0 = null;
         for (GSLayoutGlyph glyph1 : glyphs) {
-            if (builder.charUtils.canBreak(glyph0, glyph1)) {
+            if (GSCharUtils.canBreak(glyph0, glyph1)) {
                 breakPos = pos;
             }
             float currentSize = glyph1.getUsedEndSize();
             if (currentSize > size) {
-                if (builder.charUtils.shouldCompressEnd(glyph1) && builder.charUtils.canCompress(glyph1)) {
+                if (GSCharUtils.shouldCompressEnd(glyph1) && GSCharUtils.canCompress(glyph1)) {
                     float compressEnd = glyph1.size * builder.punctuationCompressRate;
                     currentSize = glyph1.getEndSize() - compressEnd;
                 }
@@ -370,16 +354,16 @@ public class GSLayout {
         return breakPos;
     }
 
-    void adjustEndGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
+    private void adjustEndGlyphs(LinkedList<GSLayoutGlyph> glyphs) {
         // Compress last none CRLF glyph if possible
         GSLayoutGlyph lastGlyph = glyphs.getLast();
         GSLayoutGlyph crlfGlyph = null;
-        if (builder.charUtils.isNewline(lastGlyph)) {
+        if (GSCharUtils.isNewline(lastGlyph.code())) {
             crlfGlyph = lastGlyph;
             glyphs.removeLast();
             lastGlyph = glyphs.peekLast();
         }
-        if (builder.charUtils.shouldCompressEnd(lastGlyph) && builder.charUtils.canCompress(lastGlyph)) {
+        if (GSCharUtils.shouldCompressEnd(lastGlyph) && GSCharUtils.canCompress(lastGlyph)) {
             lastGlyph.compressEnd = lastGlyph.size * builder.punctuationCompressRate;
         }
         if (lastGlyph.code() == ' ') {
@@ -395,10 +379,10 @@ public class GSLayout {
         }
     }
 
-    PointF adjustGlyphs(LinkedList<GSLayoutGlyph> glyphs, int textLength, float size) {
+    private PointF adjustGlyphs(LinkedList<GSLayoutGlyph> glyphs, int textLength, float size) {
         PointF origin = new PointF();
         GSLayoutGlyph lastGlyph = glyphs.getLast();
-        boolean lastLine = builder.charUtils.isNewline(lastGlyph) || lastGlyph.end == textLength;
+        boolean lastLine = GSCharUtils.isNewline(lastGlyph.code()) || lastGlyph.end == textLength;
         float adjustSize = size - lastGlyph.getUsedEndSize();
         if (adjustSize == 0) {
             return origin;
@@ -426,7 +410,7 @@ public class GSLayout {
                     for (int i = 1; i < glyphs.size(); ++i) {
                         GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
                         GSLayoutGlyph thisGlyph = glyphs.get(i);
-                        if (builder.charUtils.canStretch(prevGlyph, thisGlyph)) {
+                        if (GSCharUtils.canStretch(prevGlyph, thisGlyph)) {
                             ++stretchCount;
                         }
                     }
@@ -435,7 +419,7 @@ public class GSLayout {
                     for (int i = 1; i < glyphs.size(); ++i) {
                         GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
                         GSLayoutGlyph thisGlyph = glyphs.get(i);
-                        if (builder.charUtils.canStretch(prevGlyph, thisGlyph)) {
+                        if (GSCharUtils.canStretch(prevGlyph, thisGlyph)) {
                             move += stretchSize;
                         }
                         if (builder.vertical) {
@@ -450,13 +434,5 @@ public class GSLayout {
                 break;
         }
         return origin;
-    }
-
-    void setUsedWidth(float usedWidth) {
-        this.usedWidth = usedWidth;
-    }
-
-    void setUsedHeight(float usedHeight) {
-        this.usedHeight = usedHeight;
     }
 }
