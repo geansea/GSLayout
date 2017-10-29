@@ -18,15 +18,15 @@ public class GSLayout {
     }
 
     public static final class Builder {
-        TextPaint paint;
-        int width;
-        int height;
-        float indent;
-        float punctuationCompressRate;
-        Alignment alignment;
-        float lineSpacing;
-        float paragraphSpacing;
-        boolean vertical;
+        private final TextPaint paint;
+        private int width;
+        private int height;
+        private float indent;
+        private float punctuationCompressRate;
+        private Alignment alignment;
+        private float lineSpacing;
+        private float paragraphSpacing;
+        private boolean vertical;
 
         public static Builder obtain(TextPaint paint) {
             return new Builder(paint);
@@ -97,7 +97,7 @@ public class GSLayout {
             return layout;
         }
 
-        float getFontSize() {
+        private float getFontSize() {
             return paint.getTextSize();
         }
 

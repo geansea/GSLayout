@@ -20,7 +20,7 @@ final class GSCharUtils {
         }
         char code0 = glyph0.code();
         char code1 = glyph1.code();
-        if (glyph0.isItalic() && !glyph1.isItalic() && code1 != ' ') {
+        if (glyph0.isItalic() && !glyph1.isItalic()) {
             return true;
         }
         if (isCjk(code0)) {
