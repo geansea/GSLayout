@@ -10,9 +10,7 @@ import java.util.LinkedList;
 final class GSLayoutUtils {
     static int breakText(CharSequence text, TextPaint paint, int start, int end, float size) {
         int count = 0;
-        if (text instanceof String) {
-            count = paint.breakText(text, start, end, true, size, null);
-        } else if (text instanceof Spanned) {
+        if (text instanceof Spanned) {
             Spanned spanned = (Spanned) text;
             float measured = 0;
             int spanStart = start;
@@ -27,7 +25,7 @@ final class GSLayoutUtils {
                         span.updateMeasureState(spanPaint);
                     }
                 }
-                int spanCount = spanPaint.breakText(spanned, spanStart, spanEnd, true, size - measured, spanMeasured);
+                int spanCount = spanPaint.breakText(spanned.toString(), spanStart, spanEnd, true, size - measured, spanMeasured);
                 count += spanCount;
                 if (spanStart + spanCount < spanEnd) {
                     break;
@@ -35,6 +33,8 @@ final class GSLayoutUtils {
                 measured += spanMeasured[0];
                 spanStart = spanEnd;
             }
+        } else {
+            count = paint.breakText(text.toString(), start, end, true, size, null);
         }
         for (int pos = start; pos < Math.min(start + count + 1, end); ++pos) {
             if (GSCharUtils.isNewline(text.charAt(pos))) {
@@ -46,8 +46,8 @@ final class GSLayoutUtils {
     }
 
     static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(CharSequence text, TextPaint paint, int start, int count, float x) {
-        if (text instanceof String) {
-            return getHorizontalGlyphs((String) text, paint, start, count, x);
+        if (!(text instanceof Spanned)) {
+            return getHorizontalGlyphs(text.toString(), paint, start, count, x);
         }
         Spanned spanned = (Spanned) text;
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
@@ -74,7 +74,7 @@ final class GSLayoutUtils {
     }
 
     static LinkedList<GSLayoutGlyph> getVerticalGlyphs(CharSequence text, TextPaint paint, int start, int count, float y) {
-        if (text instanceof String) {
+        if (!(text instanceof Spanned)) {
             return getVerticalGlyphs((String) text, paint, start, count, y);
         }
         Spanned spanned = (Spanned) text;
