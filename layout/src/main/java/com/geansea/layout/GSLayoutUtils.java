@@ -74,7 +74,7 @@ final class GSLayoutUtils {
                 glyph.y = 0;
                 glyph.ascent = ascent;
                 glyph.descent = descent;
-                glyph.width = glyphWidth;
+                glyph.size = glyphWidth;
                 glyphs.add(glyph);
             }
             x += glyphWidth;
@@ -109,7 +109,7 @@ final class GSLayoutUtils {
                     glyph.y = y;
                     glyph.ascent = glyphAscent;
                     glyph.descent = glyphDescent;
-                    glyph.width = glyphSize;
+                    glyph.size = glyphSize;
                     glyph.vertical = true;
                     glyph.rotateForVertical = true;
                 } else {
@@ -123,7 +123,7 @@ final class GSLayoutUtils {
                     glyph.y = y + glyphAscent;
                     glyph.ascent = glyphAscent;
                     glyph.descent = glyphDescent;
-                    glyph.width = glyphSize;
+                    glyph.size = glyphSize;
                     glyph.vertical = true;
                 }
                 glyphs.add(glyph);
@@ -192,25 +192,25 @@ final class GSLayoutUtils {
             // Punctuation compress
             if (characterUtils.shouldCompressStart(glyph1)) {
                 if (glyph0 == null && characterUtils.canCompress(glyph1)) {
-                    glyph1.compressLeft = glyph1.width * parameters.punctuationCompressRate;
-                    move -= glyph1.compressLeft;
+                    glyph1.compressStart = glyph1.size * parameters.punctuationCompressRate;
+                    move -= glyph1.compressStart;
                 }
                 if (characterUtils.shouldCompressEnd(glyph0)) {
                     if (characterUtils.canCompress(glyph1)) {
-                        glyph1.compressLeft = glyph1.width * parameters.punctuationCompressRate / 2;
-                        move -= glyph1.compressLeft;
+                        glyph1.compressStart = glyph1.size * parameters.punctuationCompressRate / 2;
+                        move -= glyph1.compressStart;
                     }
                     if (characterUtils.canCompress(glyph0)) {
-                        glyph0.compressRight = glyph0.width * parameters.punctuationCompressRate / 2;
-                        move -= glyph0.compressRight;
+                        glyph0.compressEnd = glyph0.size * parameters.punctuationCompressRate / 2;
+                        move -= glyph0.compressEnd;
                     }
                 }
             }
             if (characterUtils.shouldCompressEnd(glyph1)) {
                 if (characterUtils.shouldCompressEnd(glyph0)) {
                     if (characterUtils.canCompress(glyph0)) {
-                        glyph0.compressRight = glyph0.width * parameters.punctuationCompressRate / 2;
-                        move -= glyph0.compressRight;
+                        glyph0.compressEnd = glyph0.size * parameters.punctuationCompressRate / 2;
+                        move -= glyph0.compressEnd;
                     }
                 }
             }
@@ -222,8 +222,8 @@ final class GSLayoutUtils {
             }
             // Fix CRLF width
             if (characterUtils.isNewline(glyph1)) {
-                glyph1.compressRight = glyph1.width;
-                move -= glyph1.width;
+                glyph1.compressEnd = glyph1.size;
+                move -= glyph1.size;
             }
             glyph0 = glyph1;
         }
@@ -240,7 +240,7 @@ final class GSLayoutUtils {
             float currentSize = glyph1.getUsedEndSize();
             if (currentSize > size) {
                 if (characterUtils.shouldCompressEnd(glyph1) && characterUtils.canCompress(glyph1)) {
-                    float compressEnd = glyph1.width * parameters.punctuationCompressRate;
+                    float compressEnd = glyph1.size * parameters.punctuationCompressRate;
                     currentSize = glyph1.getEndSize() - compressEnd;
                 }
             }
@@ -277,10 +277,10 @@ final class GSLayoutUtils {
             lastGlyph = glyphs.peekLast();
         }
         if (characterUtils.shouldCompressEnd(lastGlyph) && characterUtils.canCompress(lastGlyph)) {
-            lastGlyph.compressRight = lastGlyph.width * parameters.punctuationCompressRate;
+            lastGlyph.compressEnd = lastGlyph.size * parameters.punctuationCompressRate;
         }
         if (lastGlyph.code() == ' ') {
-            lastGlyph.compressRight = lastGlyph.width;
+            lastGlyph.compressEnd = lastGlyph.size;
         }
         if (crlfGlyph != null) {
             if (parameters.vertical) {

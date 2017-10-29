@@ -12,19 +12,19 @@ public class GSLayoutGlyph {
     float y;
     float ascent;
     float descent;
-    float width;
-    float compressLeft;
-    float compressRight;
+    float size;
+    float compressStart;
+    float compressEnd;
     boolean vertical;
     boolean rotateForVertical;
 
     public RectF getUsedRect() {
         if (rotateForVertical) {
-            return new RectF(x - descent, y + compressLeft, x + ascent, y + width - compressRight);
+            return new RectF(x - descent, y + compressStart, x + ascent, y + size - compressEnd);
         } else if (vertical) {
-            return new RectF(x, y - ascent + compressLeft, x + width, y + descent - compressRight);
+            return new RectF(x, y - ascent + compressStart, x + size, y + descent - compressEnd);
         } else {
-            return new RectF(x + compressLeft, y - ascent, x + width - compressRight, y + descent);
+            return new RectF(x + compressStart, y - ascent, x + size - compressEnd, y + descent);
         }
     }
 
@@ -37,7 +37,7 @@ public class GSLayoutGlyph {
     }
 
     boolean isFullSize() {
-        return (width >= paint.getTextSize());
+        return (size >= paint.getTextSize());
     }
 
     boolean isItalic() {
@@ -54,9 +54,9 @@ public class GSLayoutGlyph {
 
     private RectF getRect() {
         if (rotateForVertical) {
-            return new RectF(x - descent, y, x + ascent, y + width);
+            return new RectF(x - descent, y, x + ascent, y + size);
         } else {
-            return new RectF(x, y - ascent, x + width, y + descent);
+            return new RectF(x, y - ascent, x + size, y + descent);
         }
     }
 }
