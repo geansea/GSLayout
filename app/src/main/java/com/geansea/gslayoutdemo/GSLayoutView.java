@@ -21,7 +21,7 @@ import com.geansea.layout.GSSpannedLayout;
 import java.util.ArrayList;
 
 class GSLayoutView extends View {
-    private GSLayout.Parameters parameters;
+    private GSLayout.Builder builder;
     private CharSequence text;
     private boolean complexMode;
     private ArrayList<GSLayoutLine> lines;
@@ -31,7 +31,7 @@ class GSLayoutView extends View {
         super(context, attrs);
         TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);
-        parameters = GSLayout.Parameters.obtain(paint)
+        builder = GSLayout.Builder.obtain(paint)
                 .setIndent(2)
                 .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                 .setLineSpacing(0.2f)
@@ -49,22 +49,22 @@ class GSLayoutView extends View {
     }
 
     public void setTypeface(Typeface typeface) {
-        parameters.setTypeface(typeface);
+        builder.setTypeface(typeface);
         requestLayout();
     }
 
     public void setFontSize(float fontSize) {
-        parameters.setFontSize(fontSize);
+        builder.setFontSize(fontSize);
         requestLayout();
     }
 
     public void setPunctuationCompressRate(float punctuationCompressRate) {
-        parameters.setPunctuationCompressRate(punctuationCompressRate);
+        builder.setPunctuationCompressRate(punctuationCompressRate);
         requestLayout();
     }
 
     public void setVertical(boolean vertical) {
-        parameters.setVertical(vertical);
+        builder.setVertical(vertical);
         requestLayout();
     }
 
@@ -97,14 +97,14 @@ class GSLayoutView extends View {
     }
 
     private ArrayList<GSLayoutLine> layoutLines(int width, int height, int start) {
-        parameters.setWidth(width).setHeight(height);
+        builder.setWidth(width).setHeight(height);
         if (text instanceof String) {
-            GSSimpleLayout layout = GSSimpleLayout.build((String) text, start, text.length(), parameters);
+            GSSimpleLayout layout = GSSimpleLayout.build((String) text, start, text.length(), builder);
             if (layout != null) {
                 return layout.getLines();
             }
         } else if (text instanceof Spanned) {
-            GSSpannedLayout layout = GSSpannedLayout.build((Spanned) text, start, text.length(), parameters);
+            GSSpannedLayout layout = GSSpannedLayout.build((Spanned) text, start, text.length(), builder);
             if (layout != null) {
                 return layout.getLines();
             }

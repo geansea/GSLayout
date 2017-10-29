@@ -181,27 +181,27 @@ final class GSLayoutUtils {
         return glyphs;
     }
 
-    void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Parameters parameters) {
+    void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Builder builder) {
         float move = 0;
         GSLayoutGlyph glyph0 = null;
         for (GSLayoutGlyph glyph1 : glyphs) {
             // Add gap
             if (characterUtils.shouldAddGap(glyph0, glyph1)) {
-                move += parameters.getFontSize() / 6;
+                move += builder.getFontSize() / 6;
             }
             // Punctuation compress
             if (characterUtils.shouldCompressStart(glyph1)) {
                 if (glyph0 == null && characterUtils.canCompress(glyph1)) {
-                    glyph1.compressStart = glyph1.size * parameters.punctuationCompressRate;
+                    glyph1.compressStart = glyph1.size * builder.punctuationCompressRate;
                     move -= glyph1.compressStart;
                 }
                 if (characterUtils.shouldCompressEnd(glyph0)) {
                     if (characterUtils.canCompress(glyph1)) {
-                        glyph1.compressStart = glyph1.size * parameters.punctuationCompressRate / 2;
+                        glyph1.compressStart = glyph1.size * builder.punctuationCompressRate / 2;
                         move -= glyph1.compressStart;
                     }
                     if (characterUtils.canCompress(glyph0)) {
-                        glyph0.compressEnd = glyph0.size * parameters.punctuationCompressRate / 2;
+                        glyph0.compressEnd = glyph0.size * builder.punctuationCompressRate / 2;
                         move -= glyph0.compressEnd;
                     }
                 }
@@ -209,13 +209,13 @@ final class GSLayoutUtils {
             if (characterUtils.shouldCompressEnd(glyph1)) {
                 if (characterUtils.shouldCompressEnd(glyph0)) {
                     if (characterUtils.canCompress(glyph0)) {
-                        glyph0.compressEnd = glyph0.size * parameters.punctuationCompressRate / 2;
+                        glyph0.compressEnd = glyph0.size * builder.punctuationCompressRate / 2;
                         move -= glyph0.compressEnd;
                     }
                 }
             }
             // Move
-            if (parameters.vertical) {
+            if (builder.vertical) {
                 glyph1.y += move;
             } else {
                 glyph1.x += move;
@@ -229,7 +229,7 @@ final class GSLayoutUtils {
         }
     }
 
-    int breakGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Parameters parameters, float size) {
+    int breakGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Builder builder, float size) {
         int breakPos = 0;
         int pos = 0;
         GSLayoutGlyph glyph0 = null;
@@ -240,7 +240,7 @@ final class GSLayoutUtils {
             float currentSize = glyph1.getUsedEndSize();
             if (currentSize > size) {
                 if (characterUtils.shouldCompressEnd(glyph1) && characterUtils.canCompress(glyph1)) {
-                    float compressEnd = glyph1.size * parameters.punctuationCompressRate;
+                    float compressEnd = glyph1.size * builder.punctuationCompressRate;
                     currentSize = glyph1.getEndSize() - compressEnd;
                 }
             }
@@ -267,7 +267,7 @@ final class GSLayoutUtils {
         return breakPos;
     }
 
-    void adjustEndGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Parameters parameters) {
+    void adjustEndGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Builder builder) {
         // Compress last none CRLF glyph if possible
         GSLayoutGlyph lastGlyph = glyphs.getLast();
         GSLayoutGlyph crlfGlyph = null;
@@ -277,13 +277,13 @@ final class GSLayoutUtils {
             lastGlyph = glyphs.peekLast();
         }
         if (characterUtils.shouldCompressEnd(lastGlyph) && characterUtils.canCompress(lastGlyph)) {
-            lastGlyph.compressEnd = lastGlyph.size * parameters.punctuationCompressRate;
+            lastGlyph.compressEnd = lastGlyph.size * builder.punctuationCompressRate;
         }
         if (lastGlyph.code() == ' ') {
             lastGlyph.compressEnd = lastGlyph.size;
         }
         if (crlfGlyph != null) {
-            if (parameters.vertical) {
+            if (builder.vertical) {
                 crlfGlyph.y = lastGlyph.getUsedEndSize();
             } else {
                 crlfGlyph.x = lastGlyph.getUsedEndSize();
@@ -292,58 +292,59 @@ final class GSLayoutUtils {
         }
     }
 
-    PointF adjustGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Parameters parameters, int textLength, float size) {
+    PointF adjustGlyphs(LinkedList<GSLayoutGlyph> glyphs, GSLayout.Builder builder, int textLength, float size) {
         PointF origin = new PointF();
         GSLayoutGlyph lastGlyph = glyphs.getLast();
         boolean lastLine = characterUtils.isNewline(lastGlyph) || lastGlyph.end == textLength;
         float adjustSize = size - lastGlyph.getUsedEndSize();
-        if (adjustSize > 0) {
-            switch (parameters.alignment) {
-                case ALIGN_NORMAL:
-                    break;
-                case ALIGN_OPPOSITE:
-                    if (parameters.vertical) {
-                        origin.y += adjustSize;
-                    } else {
-                        origin.x += adjustSize;
-                    }
-                    break;
-                case ALIGN_CENTER:
-                    if (parameters.vertical) {
-                        origin.y += adjustSize / 2;
-                    } else {
-                        origin.x += adjustSize / 2;
-                    }
-                    break;
-                case ALIGN_JUSTIFY:
-                    if (!lastLine) {
-                        int stretchCount = 0;
-                        for (int i = 1; i < glyphs.size(); ++i) {
-                            GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
-                            GSLayoutGlyph thisGlyph = glyphs.get(i);
-                            if (characterUtils.canStretch(prevGlyph, thisGlyph)) {
-                                ++stretchCount;
-                            }
+        if (adjustSize == 0) {
+            return origin;
+        }
+        switch (builder.alignment) {
+            case ALIGN_NORMAL:
+                break;
+            case ALIGN_OPPOSITE:
+                if (builder.vertical) {
+                    origin.y += adjustSize;
+                } else {
+                    origin.x += adjustSize;
+                }
+                break;
+            case ALIGN_CENTER:
+                if (builder.vertical) {
+                    origin.y += adjustSize / 2;
+                } else {
+                    origin.x += adjustSize / 2;
+                }
+                break;
+            case ALIGN_JUSTIFY:
+                if (!lastLine) {
+                    int stretchCount = 0;
+                    for (int i = 1; i < glyphs.size(); ++i) {
+                        GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
+                        GSLayoutGlyph thisGlyph = glyphs.get(i);
+                        if (characterUtils.canStretch(prevGlyph, thisGlyph)) {
+                            ++stretchCount;
                         }
-                        float stretchSize = adjustSize / stretchCount;
-                        float move = 0;
-                        for (int i = 1; i < glyphs.size(); ++i) {
-                            GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
-                            GSLayoutGlyph thisGlyph = glyphs.get(i);
-                            if (characterUtils.canStretch(prevGlyph, thisGlyph)) {
-                                move += stretchSize;
-                            }
-                            if (parameters.vertical) {
-                                thisGlyph.y += move;
-                            } else {
-                                thisGlyph.x += move;
-                            }
-                        }
-                        break;
                     }
-                default:
+                    float stretchSize = adjustSize / stretchCount;
+                    float move = 0;
+                    for (int i = 1; i < glyphs.size(); ++i) {
+                        GSLayoutGlyph prevGlyph = glyphs.get(i - 1);
+                        GSLayoutGlyph thisGlyph = glyphs.get(i);
+                        if (characterUtils.canStretch(prevGlyph, thisGlyph)) {
+                            move += stretchSize;
+                        }
+                        if (builder.vertical) {
+                            thisGlyph.y += move;
+                        } else {
+                            thisGlyph.x += move;
+                        }
+                    }
                     break;
-            }
+                }
+            default:
+                break;
         }
         return origin;
     }
