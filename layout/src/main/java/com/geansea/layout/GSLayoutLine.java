@@ -69,7 +69,7 @@ public class GSLayoutLine {
             GSLayoutGlyph last = glyphs.get(glyphs.size() - 1);
             line.start = first.start;
             line.end = last.end;
-            line.size = last.getUsedRect().right;
+            line.size = last.getUsedEndSize();
             line.text = text.subSequence(line.start, line.end);
             line.glyphs = glyphs;
             for (GSLayoutGlyph glyph : glyphs) {
@@ -89,7 +89,7 @@ public class GSLayoutLine {
             GSLayoutGlyph last = glyphs.get(glyphs.size() - 1);
             line.start = first.start;
             line.end = last.end;
-            line.size = last.getUsedRect().bottom;
+            line.size = last.getUsedEndSize();
             line.text = text.subSequence(line.start, line.end);
             line.glyphs = glyphs;
             for (GSLayoutGlyph glyph : glyphs) {

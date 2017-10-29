@@ -6,15 +6,15 @@ import java.util.HashSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "RedundantIfStatement"})
 final class GSCharacterUtils {
-    private HashSet<Character> compressLeftSet;
-    private HashSet<Character> compressRightSet;
+    private HashSet<Character> compressStartSet;
+    private HashSet<Character> compressEndSet;
     private HashSet<Character> notLineBeginSet;
     private HashSet<Character> notLineEndSet;
     private HashSet<Character> rotateForVerticalSet;
     private HashMap<Character, Character> replaceForVerticalMap;
 
     GSCharacterUtils() {
-        compressLeftSet = new HashSet<>(Arrays.asList(new Character[]{
+        compressStartSet = new HashSet<>(Arrays.asList(new Character[]{
                 '\u2018', // ‘
                 '\u201C', // “
                 '\u3008', // 〈
@@ -28,7 +28,7 @@ final class GSCharacterUtils {
                 '\uFF3B', // ［
                 '\uFF5B', // ｛
         }));
-        compressRightSet = new HashSet<>(Arrays.asList(new Character[]{
+        compressEndSet = new HashSet<>(Arrays.asList(new Character[]{
                 '\u2019', // ’
                 '\u201D', // ”
                 '\u3001', // 、
@@ -126,12 +126,6 @@ final class GSCharacterUtils {
         return glyph != null && isNewline(glyph.code());
     }
 
-    boolean shouldAddGap(char prevCode, char code) {
-        return (isAlphaDigit(prevCode) && isCjk(code)) ||
-                (isCjk(prevCode) && isAlphaDigit(code)) ||
-                ('%' == prevCode && isCjk(code));
-    }
-
     boolean shouldAddGap(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
         if (glyph0 == null || glyph1 == null) {
             return false;
@@ -151,7 +145,7 @@ final class GSCharacterUtils {
     }
 
     boolean canCompressLeft(char code) {
-        return compressLeftSet.contains(code);
+        return compressStartSet.contains(code);
     }
 
     boolean canCompress(GSLayoutGlyph glyph) {
@@ -172,18 +166,18 @@ final class GSCharacterUtils {
         if (glyph == null) {
             return false;
         }
-        return compressLeftSet.contains(glyph.code());
+        return compressStartSet.contains(glyph.code());
     }
 
     boolean shouldCompressEnd(GSLayoutGlyph glyph) {
         if (glyph == null) {
             return false;
         }
-        return compressRightSet.contains(glyph.code());
+        return compressEndSet.contains(glyph.code());
     }
 
     boolean canCompressRight(char code) {
-        return compressRightSet.contains(code);
+        return compressEndSet.contains(code);
     }
 
     boolean canBreak(char prevCode, char code) {
@@ -218,6 +212,46 @@ final class GSCharacterUtils {
         return !cannotLineEnd(prevCode) && !cannotLineBegin(code);
     }
 
+    boolean canBreak(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
+        if (glyph0 == null || glyph1 == null) {
+            return false;
+        }
+        char code0 = glyph0.code();
+        char code1 = glyph1.code();
+        // Always can break after space
+        if (code0 == ' ') {
+            return true;
+        }
+        // No Break SPace
+        if (code0 == '\u00A0') {
+            return false;
+        }
+        // Space follow prev
+        if (code1 == ' ' || code1 == '\u00A0') {
+            return false;
+        }
+        if (isAlphaDigit(code0)) {
+            if (isAlphaDigit(code1)) {
+                return false;
+            }
+            if (code1 == '\'' || code1 == '\"' || code1 == '-' || code1 == '_' || code1 == '%') {
+                return false;
+            }
+        }
+        if (isAlphaDigit(code1)) {
+            if (code0 == '\'' || code0 == '\"' || code0 == '\u2019') {
+                return false;
+            }
+        }
+        if (cannotLineEnd(code0)) {
+            return false;
+        }
+        if (cannotLineBegin(code1)) {
+            return false;
+        }
+        return true;
+    }
+
     boolean canStretch(char prevCode, char code) {
         if (!canBreak(prevCode, code)) {
             return false;
@@ -231,6 +265,21 @@ final class GSCharacterUtils {
             if (isAlphaDigit(prevCode)) {
                 return false;
             }
+        }
+        return true;
+    }
+
+    boolean canStretch(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
+        if (!canBreak(glyph0, glyph1)) {
+            return false;
+        }
+        char code0 = glyph0.code();
+        char code1 = glyph1.code();
+        if ('/' == code0 && isAlphaDigit(code1)) {
+            return false;
+        }
+        if (isAlphaDigit(code0) && '/' == code1) {
+            return false;
         }
         return true;
     }
