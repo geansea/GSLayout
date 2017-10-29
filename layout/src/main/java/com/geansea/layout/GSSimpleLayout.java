@@ -124,11 +124,11 @@ public class GSSimpleLayout extends GSLayout {
         } else {
             glyphs = layoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
         }
-        layoutUtils.compressGlyphs(glyphs, getBuilder());
-        int breakPos = layoutUtils.breakGlyphs(glyphs, getBuilder(), size);
+        compressGlyphs(glyphs);
+        int breakPos = breakGlyphs(glyphs, size);
         glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
-        layoutUtils.adjustEndGlyphs(glyphs, getBuilder());
-        PointF origin = layoutUtils.adjustGlyphs(glyphs, getBuilder(), text.length(), size);
+        adjustEndGlyphs(glyphs);
+        PointF origin = adjustGlyphs(glyphs, text.length(), size);
         if (getBuilder().vertical) {
             return GSLayoutLine.createVerticalLine(text, glyphs, origin);
         } else {
