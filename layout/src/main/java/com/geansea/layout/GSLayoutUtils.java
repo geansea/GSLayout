@@ -45,7 +45,63 @@ final class GSLayoutUtils {
         return count;
     }
 
-    static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(String text, TextPaint paint, int start, int count, float x) {
+    static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(CharSequence text, TextPaint paint, int start, int count, float x) {
+        if (text instanceof String) {
+            return getHorizontalGlyphs((String) text, paint, start, count, x);
+        }
+        Spanned spanned = (Spanned) text;
+        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
+        int spanStart = start;
+        while (spanStart < start + count) {
+            int spanEnd = spanned.nextSpanTransition(spanStart, start + count, CharacterStyle.class);
+            TextPaint spanPaint = paint;
+            CharacterStyle[] spans = spanned.getSpans(spanStart, spanEnd, CharacterStyle.class);
+            if (spans != null && spans.length > 0) {
+                spanPaint = new TextPaint(paint);
+                for (CharacterStyle span : spans) {
+                    span.updateDrawState(spanPaint);
+                    if (span instanceof MetricAffectingSpan) {
+                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
+                    }
+                }
+            }
+            LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
+            glyphs.addAll(spanGlyphs);
+            spanStart = spanEnd;
+            x = glyphs.getLast().getEndSize();
+        }
+        return glyphs;
+    }
+
+    static LinkedList<GSLayoutGlyph> getVerticalGlyphs(CharSequence text, TextPaint paint, int start, int count, float y) {
+        if (text instanceof String) {
+            return getVerticalGlyphs((String) text, paint, start, count, y);
+        }
+        Spanned spanned = (Spanned) text;
+        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
+        int spanStart = start;
+        while (spanStart < start + count) {
+            int spanEnd = spanned.nextSpanTransition(spanStart, start + count, CharacterStyle.class);
+            TextPaint spanPaint = paint;
+            CharacterStyle[] spans = spanned.getSpans(spanStart, spanEnd, CharacterStyle.class);
+            if (spans != null && spans.length > 0) {
+                spanPaint = new TextPaint(paint);
+                for (CharacterStyle span : spans) {
+                    span.updateDrawState(spanPaint);
+                    if (span instanceof MetricAffectingSpan) {
+                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
+                    }
+                }
+            }
+            LinkedList<GSLayoutGlyph> spanGlyphs = getVerticalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
+            glyphs.addAll(spanGlyphs);
+            spanStart = spanEnd;
+            y = glyphs.getLast().getEndSize();
+        }
+        return glyphs;
+    }
+
+    private static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(String text, TextPaint paint, int start, int count, float x) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         float ascent = -paint.ascent();
         float descent = paint.descent();
@@ -75,7 +131,7 @@ final class GSLayoutUtils {
         return glyphs;
     }
 
-    static LinkedList<GSLayoutGlyph> getVerticalGlyphs(String text, TextPaint paint, int start, int count, float y) {
+    private static LinkedList<GSLayoutGlyph> getVerticalGlyphs(String text, TextPaint paint, int start, int count, float y) {
         text = GSCharUtils.replaceTextForVertical(text);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         float fontSize = paint.getTextSize();
@@ -122,54 +178,6 @@ final class GSLayoutUtils {
                 glyphs.add(glyph);
             }
             y += glyphSize;
-        }
-        return glyphs;
-    }
-
-    static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(Spanned text, TextPaint paint, int start, int count, float x) {
-        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
-        int spanStart = start;
-        while (spanStart < start + count) {
-            int spanEnd = text.nextSpanTransition(spanStart, start + count, CharacterStyle.class);
-            TextPaint spanPaint = paint;
-            CharacterStyle[] spans = text.getSpans(spanStart, spanEnd, CharacterStyle.class);
-            if (spans != null && spans.length > 0) {
-                spanPaint = new TextPaint(paint);
-                for (CharacterStyle span : spans) {
-                    span.updateDrawState(spanPaint);
-                    if (span instanceof MetricAffectingSpan) {
-                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
-                    }
-                }
-            }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
-            glyphs.addAll(spanGlyphs);
-            spanStart = spanEnd;
-            x = glyphs.getLast().getEndSize();
-        }
-        return glyphs;
-    }
-
-    static LinkedList<GSLayoutGlyph> getVerticalGlyphs(Spanned text, TextPaint paint, int start, int count, float y) {
-        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
-        int spanStart = start;
-        while (spanStart < start + count) {
-            int spanEnd = text.nextSpanTransition(spanStart, start + count, CharacterStyle.class);
-            TextPaint spanPaint = paint;
-            CharacterStyle[] spans = text.getSpans(spanStart, spanEnd, CharacterStyle.class);
-            if (spans != null && spans.length > 0) {
-                spanPaint = new TextPaint(paint);
-                for (CharacterStyle span : spans) {
-                    span.updateDrawState(spanPaint);
-                    if (span instanceof MetricAffectingSpan) {
-                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
-                    }
-                }
-            }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getVerticalGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
-            glyphs.addAll(spanGlyphs);
-            spanStart = spanEnd;
-            y = glyphs.getLast().getEndSize();
         }
         return glyphs;
     }

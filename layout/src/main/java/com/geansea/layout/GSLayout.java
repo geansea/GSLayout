@@ -243,20 +243,17 @@ public class GSLayout {
     }
 
     private GSLayoutLine layoutLine(int start) {
-        String text = getText().toString();
-        TextPaint paint = builder.paint;
-        float fontSize = builder.getFontSize();
         float indent = 0;
         if (0 == start || GSCharUtils.isNewline(text.charAt(start - 1))) {
-            indent = fontSize * builder.indent;
+            indent = builder.getFontSize() * builder.indent;
         }
         float size = builder.vertical ? getHeight() : getWidth();
-        int count = GSLayoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
+        int count = GSLayoutUtils.breakText(text, builder.paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
         LinkedList<GSLayoutGlyph> glyphs;
         if (builder.vertical) {
-            glyphs = GSLayoutUtils.getVerticalGlyphs(text, paint, start, count, indent);
+            glyphs = GSLayoutUtils.getVerticalGlyphs(text, builder.paint, start, count, indent);
         } else {
-            glyphs = GSLayoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
+            glyphs = GSLayoutUtils.getHorizontalGlyphs(text, builder.paint, start, count, indent);
         }
         compressGlyphs(glyphs);
         int breakPos = breakGlyphs(glyphs, size);
