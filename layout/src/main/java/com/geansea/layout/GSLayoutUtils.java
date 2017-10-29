@@ -52,7 +52,7 @@ final class GSLayoutUtils {
         return count;
     }
 
-    LinkedList<GSLayoutGlyph> getHoriGlyphs(String text, TextPaint paint, int start, int count, float x) {
+    LinkedList<GSLayoutGlyph> getHorizontalGlyphs(String text, TextPaint paint, int start, int count, float x) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         float ascent = -paint.ascent();
         float descent = paint.descent();
@@ -82,12 +82,12 @@ final class GSLayoutUtils {
         return glyphs;
     }
 
-    LinkedList<GSLayoutGlyph> getVertGlyphs(String text, TextPaint paint, int start, int count, float y) {
+    LinkedList<GSLayoutGlyph> getVerticalGlyphs(String text, TextPaint paint, int start, int count, float y) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         text = characterUtils.replaceTextForVertical(text);
         float fontSize = paint.getTextSize();
-        float ascent = -paint.ascent();
-        float descent = paint.descent();
+        //float ascent = -paint.ascent();
+        //float descent = paint.descent();
         float widths[] = new float[count];
         paint.getTextWidths(text, start, start + count, widths);
         for (int i = 0; i < count; ++i) {
@@ -103,24 +103,28 @@ final class GSLayoutUtils {
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
                 if (characterUtils.shouldRotateForVertical(glyph.code()) || glyphSize < fontSize) {
-                    glyph.x = (descent - ascent) / 2;
+                    float glyphAscent = fontSize * 0.88f;
+                    float glyphDescent = fontSize * 0.12f;
+                    glyph.x = (glyphDescent - glyphAscent) / 2;
                     glyph.y = y;
-                    glyph.ascent = ascent;
-                    glyph.descent = descent;
+                    glyph.ascent = glyphAscent;
+                    glyph.descent = glyphDescent;
                     glyph.width = glyphSize;
                     glyph.vertical = true;
                     glyph.rotateForVertical = true;
                 } else {
-                    float extended = ascent + descent - glyphSize;
-                    float ascentForVertical = ascent - extended / 2;
-                    float descentForVertical = descent - extended / 2;
+                    float glyphAscent = glyphSize * 0.88f;
+                    float glyphDescent = glyphSize * 0.12f;
+                    if (characterUtils.isVerticalPunctuation(glyph.code())) {
+                        glyphAscent = glyphSize;
+                        glyphDescent = 0;
+                    }
                     glyph.x = -glyphSize / 2;
-                    glyph.y = y + ascentForVertical;
-                    glyph.ascent = ascentForVertical;
-                    glyph.descent = descentForVertical;
+                    glyph.y = y + glyphAscent;
+                    glyph.ascent = glyphAscent;
+                    glyph.descent = glyphDescent;
                     glyph.width = glyphSize;
                     glyph.vertical = true;
-                    glyphSize = ascentForVertical + descentForVertical;
                 }
                 glyphs.add(glyph);
             }
@@ -129,7 +133,7 @@ final class GSLayoutUtils {
         return glyphs;
     }
 
-    LinkedList<GSLayoutGlyph> getHoriGlyphs(Spanned text, TextPaint paint, int start, int count, float x) {
+    LinkedList<GSLayoutGlyph> getHorizontalGlyphs(Spanned text, TextPaint paint, int start, int count, float x) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         int spanStart = start;
         while (spanStart < start + count) {
@@ -145,7 +149,7 @@ final class GSLayoutUtils {
                     }
                 }
             }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getHoriGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
+            LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
             x = glyphs.getLast().getEndSize();
@@ -153,7 +157,7 @@ final class GSLayoutUtils {
         return glyphs;
     }
 
-    LinkedList<GSLayoutGlyph> getVertGlyphs(Spanned text, TextPaint paint, int start, int count, float y) {
+    LinkedList<GSLayoutGlyph> getVerticalGlyphs(Spanned text, TextPaint paint, int start, int count, float y) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         int spanStart = start;
         while (spanStart < start + count) {
@@ -169,7 +173,7 @@ final class GSLayoutUtils {
                     }
                 }
             }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getVertGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
+            LinkedList<GSLayoutGlyph> spanGlyphs = getVerticalGlyphs(text.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
             y = glyphs.getLast().getEndSize();
@@ -280,9 +284,9 @@ final class GSLayoutUtils {
         }
         if (crlfGlyph != null) {
             if (parameters.vertical) {
-                crlfGlyph.y = lastGlyph.getEndSize();
+                crlfGlyph.y = lastGlyph.getUsedEndSize();
             } else {
-                crlfGlyph.x = lastGlyph.getEndSize();
+                crlfGlyph.x = lastGlyph.getUsedEndSize();
             }
             glyphs.addLast(crlfGlyph);
         }

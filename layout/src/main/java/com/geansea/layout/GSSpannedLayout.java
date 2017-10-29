@@ -119,9 +119,9 @@ public class GSSpannedLayout extends GSLayout {
         int count = layoutUtils.breakText(text, paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
         LinkedList<GSLayoutGlyph> glyphs;
         if (getParameters().vertical) {
-            glyphs = layoutUtils.getVertGlyphs(text, paint, start, count, indent);
+            glyphs = layoutUtils.getVerticalGlyphs(text, paint, start, count, indent);
         } else {
-            glyphs = layoutUtils.getHoriGlyphs(text, paint, start, count, indent);
+            glyphs = layoutUtils.getHorizontalGlyphs(text, paint, start, count, indent);
         }
         layoutUtils.compressGlyphs(glyphs, getParameters());
         int breakPos = layoutUtils.breakGlyphs(glyphs, getParameters(), size);

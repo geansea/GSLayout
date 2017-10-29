@@ -126,6 +126,10 @@ final class GSCharacterUtils {
         return glyph != null && isNewline(glyph.code());
     }
 
+    boolean isVerticalPunctuation(char code) {
+        return ('\uFE10' <= code && code <= '\uFE16');
+    }
+
     boolean shouldAddGap(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
         if (glyph0 == null || glyph1 == null) {
             return false;
@@ -144,19 +148,15 @@ final class GSCharacterUtils {
         return false;
     }
 
-    boolean canCompressLeft(char code) {
-        return compressStartSet.contains(code);
-    }
-
     boolean canCompress(GSLayoutGlyph glyph) {
         if (glyph == null) {
             return false;
         }
-        if (!glyph.isFullWidth()) {
+        if (!glyph.isFullSize()) {
             return false;
         }
         char code = glyph.code();
-        if ('\uFE13' <= code && code <= '\uFE16') {
+        if (isVerticalFullSizePunctuation(code)) {
             return false;
         }
         return true;
@@ -176,44 +176,14 @@ final class GSCharacterUtils {
         return compressEndSet.contains(glyph.code());
     }
 
-    boolean canCompressRight(char code) {
-        return compressEndSet.contains(code);
-    }
-
-    boolean canBreak(char prevCode, char code) {
-        if (0 == prevCode) {
-            return false;
-        }
-        // Always can break after space
-        if (' ' == prevCode) {
-            return true;
-        }
-        // No Break SPace
-        if ('\u00A0' == prevCode) {
-            return false;
-        }
-        // Space follow prev
-        if (' ' == code || '\u00A0' == code) {
-            return false;
-        }
-        if (isAlphaDigit(prevCode)) {
-            if (isAlphaDigit(code)) {
-                return false;
-            }
-            if ('\'' == code || '\"' == code || '-' == code || '_' == code || '%' == code) {
-                return false;
-            }
-        }
-        if (isAlphaDigit(code)) {
-            if ('\'' == prevCode || '\"' == prevCode || '\u2019' == prevCode) {
-                return false;
-            }
-        }
-        return !cannotLineEnd(prevCode) && !cannotLineBegin(code);
-    }
-
     boolean canBreak(GSLayoutGlyph glyph0, GSLayoutGlyph glyph1) {
         if (glyph0 == null || glyph1 == null) {
+            return false;
+        }
+        if (cannotLineEnd(glyph0)) {
+            return false;
+        }
+        if (cannotLineBegin(glyph1)) {
             return false;
         }
         char code0 = glyph0.code();
@@ -243,29 +213,6 @@ final class GSCharacterUtils {
                 return false;
             }
         }
-        if (cannotLineEnd(code0)) {
-            return false;
-        }
-        if (cannotLineBegin(code1)) {
-            return false;
-        }
-        return true;
-    }
-
-    boolean canStretch(char prevCode, char code) {
-        if (!canBreak(prevCode, code)) {
-            return false;
-        }
-        if ('/' == prevCode) {
-            if (isAlphaDigit(code)) {
-                return false;
-            }
-        }
-        if ('/' == code) {
-            if (isAlphaDigit(prevCode)) {
-                return false;
-            }
-        }
         return true;
     }
 
@@ -285,7 +232,10 @@ final class GSCharacterUtils {
     }
 
     boolean shouldRotateForVertical(char code) {
-        return code < 0x2600 || rotateForVerticalSet.contains(code);
+        if (code < '\u2600') {
+            return true;
+        }
+        return rotateForVerticalSet.contains(code);
     }
 
     String replaceTextForVertical(String text) {
@@ -306,12 +256,22 @@ final class GSCharacterUtils {
         return (0x4E00 <= code && code < 0xD800) || (0xE000 <= code && code < 0xFB00);
     }
 
-    private boolean cannotLineBegin(char code) {
-        return canCompressRight(code) || notLineBeginSet.contains(code);
+    private boolean isVerticalFullSizePunctuation(char code) {
+        return ('\uFE13' <= code && code <= '\uFE16');
     }
 
-    private boolean cannotLineEnd(char code) {
-        return canCompressLeft(code) || notLineEndSet.contains(code);
+    private boolean cannotLineBegin(GSLayoutGlyph glyph) {
+        if (shouldCompressEnd(glyph)) {
+            return true;
+        }
+        return notLineBeginSet.contains(glyph.code());
+    }
+
+    private boolean cannotLineEnd(GSLayoutGlyph glyph) {
+        if (shouldCompressStart(glyph)) {
+            return true;
+        }
+        return notLineEndSet.contains(glyph.code());
     }
 
     private char replaceForVertical(char code) {

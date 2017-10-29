@@ -35,7 +35,7 @@ class GSLayoutView extends View {
                 .setIndent(2)
                 .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                 .setLineSpacing(0.2f)
-                .setParagraphSpacing(0.4f);
+                .setParagraphSpacing(0.2f);
     }
 
     public void setText(CharSequence text) {
@@ -100,10 +100,14 @@ class GSLayoutView extends View {
         parameters.setWidth(width).setHeight(height);
         if (text instanceof String) {
             GSSimpleLayout layout = GSSimpleLayout.build((String) text, start, text.length(), parameters);
-            return layout.getLines();
+            if (layout != null) {
+                return layout.getLines();
+            }
         } else if (text instanceof Spanned) {
             GSSpannedLayout layout = GSSpannedLayout.build((Spanned) text, start, text.length(), parameters);
-            return layout.getLines();
+            if (layout != null) {
+                return layout.getLines();
+            }
         }
         return null;
     }

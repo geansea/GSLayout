@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 "中国共产党第十九次全国代表大会于2017年10月18日上午9时在北京人民大会堂开幕。" +
                 "习近平总书记代表十八届中央委员会向大会作报告。为更全面更深入地理解报告的内容，" +
                 "《中国访谈》节目组特别邀请中国人民大学高校哲学社会科学发展战略研究中心研究员韩宇博士对十九大报告进行解读。\n" +
-                "Emoji support: \u2766\uD83D\uDC8C\uD83D\uDE02";
+                "絵文字：\u2766\uD83D\uDC8C\uD83D\uDE02";
         String html = "" +
                 "<p>" +
                 "<b>加粗</b> " +
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
         mFontGroup = (RadioGroup) findViewById(R.id.font_group);
         mFontGroup.setOnCheckedChangeListener(mOnRadioCheckedChangeListener);
-        mFontGroup.check(R.id.system_font);
+        mFontGroup.check(R.id.source_han_sans_font);
 
         mFontSizeGroup = (RadioGroup) findViewById(R.id.font_size_group);
         mFontSizeGroup.setOnCheckedChangeListener(mOnRadioCheckedChangeListener);
