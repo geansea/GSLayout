@@ -101,7 +101,6 @@ final class GSLayoutUtils {
 
     private static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(String text, TextPaint paint, int start, int count, float x) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
-        float baseline = paint.baselineShift;
         float ascent = -paint.ascent();
         float descent = paint.descent();
         float widths[] = new float[count];
@@ -119,7 +118,7 @@ final class GSLayoutUtils {
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
                 glyph.x = x;
-                glyph.y = baseline;
+                glyph.y = 0;
                 glyph.ascent = ascent;
                 glyph.descent = descent;
                 glyph.size = glyphWidth;
@@ -134,7 +133,6 @@ final class GSLayoutUtils {
         text = GSCharUtils.replaceTextForVertical(text);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         float fontSize = paint.getTextSize();
-        //float baseline = paint.baselineShift;
         //float ascent = -paint.ascent();
         //float descent = paint.descent();
         float widths[] = new float[count];
@@ -151,7 +149,7 @@ final class GSLayoutUtils {
                 glyph.end = glyph.start + 1;
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
-                if (GSCharUtils.shouldRotateForVertical(glyph.code()) || glyphSize < fontSize) {
+                if (GSCharUtils.shouldRotateForVertical(glyph.code()) || glyphSize < fontSize * 0.9) {
                     float glyphAscent = fontSize * 0.88f;
                     float glyphDescent = fontSize * 0.12f;
                     glyph.x = (glyphDescent - glyphAscent) / 2;

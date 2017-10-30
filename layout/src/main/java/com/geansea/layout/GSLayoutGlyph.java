@@ -19,13 +19,16 @@ public class GSLayoutGlyph {
     boolean rotateForVertical;
 
     public RectF getUsedRect() {
+        RectF rect;
         if (rotateForVertical) {
-            return new RectF(x - descent, y + compressStart, x + ascent, y + size - compressEnd);
+            rect = new RectF(-descent, compressStart, ascent, size - compressEnd);
         } else if (vertical) {
-            return new RectF(x, y - ascent + compressStart, x + size, y + descent - compressEnd);
+            rect = new RectF(0, -ascent + compressStart, size, descent - compressEnd);
         } else {
-            return new RectF(x + compressStart, y - ascent, x + size - compressEnd, y + descent);
+            rect = new RectF(compressStart, -ascent, size - compressEnd, descent);
         }
+        rect.offset(getDrawX(), getDrawY());
+        return rect;
     }
 
     GSLayoutGlyph() {
@@ -36,12 +39,20 @@ public class GSLayoutGlyph {
         return text.charAt(0);
     }
 
+    float getDrawX() {
+        return vertical ? (x - paint.baselineShift) : x;
+    }
+
+    float getDrawY() {
+        return vertical ? y : (y + paint.baselineShift);
+    }
+
     boolean isFullSize() {
-        return (size >= paint.getTextSize());
+        return (size >= paint.getTextSize() * 0.9);
     }
 
     boolean isItalic() {
-        return paint.getTypeface().isItalic();
+        return (!vertical || rotateForVertical) && paint.getTypeface().isItalic();
     }
 
     float getEndSize() {
@@ -53,10 +64,13 @@ public class GSLayoutGlyph {
     }
 
     private RectF getRect() {
+        RectF rect;
         if (rotateForVertical) {
-            return new RectF(x - descent, y, x + ascent, y + size);
+            rect = new RectF(-descent, 0, ascent, size);
         } else {
-            return new RectF(x, y - ascent, x + size, y + descent);
+            rect = new RectF(0, -ascent, size, descent);
         }
+        rect.offset(getDrawX(), getDrawY());
+        return rect;
     }
 }

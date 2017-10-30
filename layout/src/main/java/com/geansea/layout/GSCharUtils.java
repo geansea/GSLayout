@@ -18,14 +18,11 @@ final class GSCharUtils {
         if (glyph0 == null || glyph1 == null) {
             return false;
         }
+        if (glyph0.paint.baselineShift != glyph1.paint.baselineShift) {
+            return false;
+        }
         if (glyph0.isItalic() && !glyph1.isItalic()) {
             return true;
-        }
-        if (!glyph0.vertical && glyph0.y != glyph1.y) {
-            return false;
-        }
-        if (glyph0.vertical && glyph0.x != glyph1.x) {
-            return false;
         }
         char code0 = glyph0.code();
         char code1 = glyph1.code();
@@ -99,7 +96,7 @@ final class GSCharUtils {
             }
         }
         if (isAlphaDigit(code1)) {
-            if (code0 == '\'' || code0 == '\"' || code0 == '\u2019') {
+            if (code0 == '\'' || code0 == '\"' || code0 == '\\' || code0 == '\u2019') {
                 return false;
             }
         }

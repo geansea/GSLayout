@@ -48,8 +48,8 @@ public class GSLayoutLine {
 
     public void draw(Canvas canvas) {
         for (GSLayoutGlyph glyph : glyphs) {
-            float glyphX = Math.round(origin.x + glyph.x);
-            float glyphY = Math.round(origin.y + glyph.y);
+            float glyphX = Math.round(origin.x + glyph.getDrawX());
+            float glyphY = Math.round(origin.y + glyph.getDrawY());
             if (glyph.rotateForVertical) {
                 canvas.save();
                 canvas.translate(glyphX, glyphY);
