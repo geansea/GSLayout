@@ -122,11 +122,12 @@ public class MainActivity extends AppCompatActivity {
                 "<p>" +
                 "<b>加粗</b> " +
                 "<i>斜体</i> " +
-                "<span style='color:red'>红</span> " +
-                "<span style='color:green'>绿</span> " +
-                "<span style='color:blue'>蓝</span> " +
+                "<font color='#FF0000'>红</font> " +
+                "<font color='#00FF00'>绿</font> " +
+                "<font color='#0000FF'>蓝</font> " +
                 "<span style='background-color:yellow'>背景色</span>" +
                 "</p><p>" +
+                "上标<sup>123</sup>下标<sub>123</sub>" +
                 "</p>";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mTestSpannedText = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);

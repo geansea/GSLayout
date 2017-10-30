@@ -73,8 +73,8 @@ public class GSLayoutLine {
             line.text = text.subSequence(line.start, line.end);
             line.glyphs = glyphs;
             for (GSLayoutGlyph glyph : glyphs) {
-                line.ascent = Math.max(line.ascent, glyph.ascent);
-                line.descent = Math.max(line.descent, glyph.descent);
+                line.ascent = Math.max(line.ascent, -glyph.getUsedRect().top);
+                line.descent = Math.max(line.descent, glyph.getUsedRect().bottom);
             }
             line.origin = origin;
             line.vertical = false;

@@ -355,7 +355,7 @@ public class GSLayout {
         // Compress last none CRLF glyph if possible
         GSLayoutGlyph lastGlyph = glyphs.getLast();
         GSLayoutGlyph crlfGlyph = null;
-        if (GSCharUtils.isNewline(lastGlyph.code())) {
+        if (GSCharUtils.isNewline(lastGlyph.code()) && glyphs.size() > 1) {
             crlfGlyph = lastGlyph;
             glyphs.removeLast();
             lastGlyph = glyphs.peekLast();

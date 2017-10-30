@@ -57,12 +57,10 @@ final class GSLayoutUtils {
             TextPaint spanPaint = paint;
             CharacterStyle[] spans = spanned.getSpans(spanStart, spanEnd, CharacterStyle.class);
             if (spans != null && spans.length > 0) {
-                spanPaint = new TextPaint(paint);
+                spanPaint = new TextPaint();
+                spanPaint.set(paint);
                 for (CharacterStyle span : spans) {
                     span.updateDrawState(spanPaint);
-                    if (span instanceof MetricAffectingSpan) {
-                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
-                    }
                 }
             }
             LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
@@ -103,6 +101,7 @@ final class GSLayoutUtils {
 
     private static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(String text, TextPaint paint, int start, int count, float x) {
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
+        float baseline = paint.baselineShift;
         float ascent = -paint.ascent();
         float descent = paint.descent();
         float widths[] = new float[count];
@@ -120,7 +119,7 @@ final class GSLayoutUtils {
                 glyph.text = text.substring(glyph.start, glyph.end);
                 glyph.paint = paint;
                 glyph.x = x;
-                glyph.y = 0;
+                glyph.y = baseline;
                 glyph.ascent = ascent;
                 glyph.descent = descent;
                 glyph.size = glyphWidth;
@@ -135,6 +134,7 @@ final class GSLayoutUtils {
         text = GSCharUtils.replaceTextForVertical(text);
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
         float fontSize = paint.getTextSize();
+        //float baseline = paint.baselineShift;
         //float ascent = -paint.ascent();
         //float descent = paint.descent();
         float widths[] = new float[count];
