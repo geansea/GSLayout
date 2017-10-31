@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.text.Spanned;
+import android.text.style.CharacterStyle;
 import android.text.style.UnderlineSpan;
 
 import java.util.ArrayList;
@@ -152,8 +153,15 @@ public class GSLayoutLine {
             GSLayoutGlyph last = spanGlyphs.getLast();
             float start = vertical ? first.getUsedRect().top : first.getUsedRect().left;
             float end = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
-            float ascent = getGlyphsMaxAscent(spanGlyphs, vertical);
-            float descent = getGlyphsMaxDescent(spanGlyphs, vertical);
+            float spanAscent = getGlyphsMaxAscent(spanGlyphs, vertical);
+            float spanDescent = getGlyphsMaxDescent(spanGlyphs, vertical);
+            RectF spanRect;
+            if (vertical) {
+                spanRect = new RectF(-descent, originY, ascent, originY + size);
+            } else {
+                spanRect = new RectF(first.getUsedRect().left, -ascent, last.getUsedRect().right, descent);
+            }
+            spanRect.offset(originX, originY);
         }
     }
 
@@ -162,5 +170,37 @@ public class GSLayoutLine {
             return;
         }
         Spanned spanned = (Spanned) text;
+    }
+
+    private int getGlyphIndexWithStart(int glyphStart) {
+        if (glyphStart < start || glyphStart >= end) {
+            return -1;
+        }
+        int glyphIndex = glyphStart - start;
+        return 0;
+    }
+
+    private int getGlyphIndexWithEnd(int glyphEnd) {
+        return getGlyphIndexWithStart(glyphEnd - 1);
+    }
+
+    private RectF getRect(int glyphStart, int glyphEnd) {
+        return null;
+    }
+
+    private RectF getRectGlyphs(CharacterStyle span) {
+        if (!(text instanceof Spanned)) {
+            return null;
+        }
+        Spanned spanned = (Spanned) text;
+        int spanStart = Math.max(spanned.getSpanStart(span), start);
+        int spanEnd = Math.min(spanned.getSpanEnd(span), end);
+        if (spanStart >= spanEnd) {
+            return null;
+        }
+        int glyphStart = spanStart;
+        int glyphEnd = spanEnd;
+        //return new LinkedList<>(glyphs.subList(glyphStart, glyphEnd));
+        return null;
     }
 }
