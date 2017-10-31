@@ -3,6 +3,8 @@ package com.geansea.layout;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.text.Spanned;
+import android.text.style.UnderlineSpan;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,7 +14,8 @@ public class GSLayoutLine {
     private int start;
     private int end;
     private LinkedList<GSLayoutGlyph> glyphs;
-    private PointF origin;
+    private float originX;
+    private float originY;
     private float ascent;
     private float descent;
     private float size;
@@ -31,14 +34,19 @@ public class GSLayoutLine {
     }
 
     public PointF getOrigin() {
-        return origin;
+        return new PointF(originX, originY);
+    }
+
+    public void setOrigin(PointF origin) {
+        originX = origin.x;
+        originY = origin.y;
     }
 
     public RectF getUsedRect() {
         if (vertical) {
-            return new RectF(origin.x - descent, origin.y, origin.x + ascent, origin.y + size);
+            return new RectF(originX - descent, originY, originX + ascent, originY + size);
         } else {
-            return new RectF(origin.x, origin.y - ascent, origin.x + size, origin.y + descent);
+            return new RectF(originX, originY - ascent, originX + size, originY + descent);
         }
     }
 
@@ -47,9 +55,13 @@ public class GSLayoutLine {
     }
 
     public void draw(Canvas canvas) {
+        // Decoration below text
+        drawBackgroundColor();
+        drawUnderline();
+        // Text
         for (GSLayoutGlyph glyph : glyphs) {
-            float glyphX = Math.round(origin.x + glyph.getDrawX());
-            float glyphY = Math.round(origin.y + glyph.getDrawY());
+            float glyphX = Math.round(originX + glyph.getDrawX());
+            float glyphY = Math.round(originY + glyph.getDrawY());
             if (glyph.rotateForVertical) {
                 canvas.save();
                 canvas.translate(glyphX, glyphY);
@@ -60,46 +72,25 @@ public class GSLayoutLine {
                 canvas.drawText(glyph.text, glyphX, glyphY, glyph.paint);
             }
         }
+        // Decoration above text
+        drawStrikeThrough();
     }
 
-    static GSLayoutLine createHorizontalLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin) {
-        GSLayoutLine line = new GSLayoutLine();
+    GSLayoutLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin, boolean vertical) {
         if (glyphs.size() > 0) {
-            GSLayoutGlyph first = glyphs.get(0);
-            GSLayoutGlyph last = glyphs.get(glyphs.size() - 1);
-            line.start = first.start;
-            line.end = last.end;
-            line.size = last.getUsedEndSize();
-            line.text = text.subSequence(line.start, line.end);
-            line.glyphs = glyphs;
-            for (GSLayoutGlyph glyph : glyphs) {
-                line.ascent = Math.max(line.ascent, -glyph.getUsedRect().top);
-                line.descent = Math.max(line.descent, glyph.getUsedRect().bottom);
-            }
-            line.origin = origin;
-            line.vertical = false;
+            GSLayoutGlyph first = glyphs.getFirst();
+            GSLayoutGlyph last = glyphs.getLast();
+            this.text = text;
+            start = first.start;
+            end = last.end;
+            this.glyphs = glyphs;
+            originX = origin.x;
+            originY = origin.y;
+            ascent = getGlyphsMaxAscent(glyphs, vertical);
+            descent = getGlyphsMaxDescent(glyphs, vertical);
+            size = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
+            this.vertical = vertical;
         }
-        return line;
-    }
-
-    static GSLayoutLine createVerticalLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin) {
-        GSLayoutLine line = new GSLayoutLine();
-        if (glyphs.size() > 0) {
-            GSLayoutGlyph first = glyphs.get(0);
-            GSLayoutGlyph last = glyphs.get(glyphs.size() - 1);
-            line.start = first.start;
-            line.end = last.end;
-            line.size = last.getUsedEndSize();
-            line.text = text.subSequence(line.start, line.end);
-            line.glyphs = glyphs;
-            for (GSLayoutGlyph glyph : glyphs) {
-                line.ascent = Math.max(line.ascent, glyph.getUsedRect().right);
-                line.descent = Math.max(line.descent, -glyph.getUsedRect().left);
-            }
-            line.origin = origin;
-            line.vertical = true;
-        }
-        return line;
     }
 
     GSLayoutGlyph getLastGlyph() {
@@ -109,6 +100,67 @@ public class GSLayoutLine {
         return glyphs.getLast();
     }
 
-    private GSLayoutLine() {
+    private static float getGlyphsMaxAscent(LinkedList<GSLayoutGlyph> glyphs, boolean vertical) {
+        float ascent = 0;
+        if (glyphs == null || glyphs.size() == 0) {
+            return ascent;
+        }
+        for (GSLayoutGlyph glyph : glyphs) {
+            float glyphAscent = vertical ? glyph.getUsedRect().right : -glyph.getUsedRect().top;
+            ascent = Math.max(ascent, glyphAscent);
+        }
+        return ascent;
+    }
+
+    private static float getGlyphsMaxDescent(LinkedList<GSLayoutGlyph> glyphs, boolean vertical) {
+        float descent = 0;
+        if (glyphs == null || glyphs.size() == 0) {
+            return descent;
+        }
+        for (GSLayoutGlyph glyph : glyphs) {
+            float glyphDescent = vertical ? -glyph.getUsedRect().left : glyph.getUsedRect().bottom;
+            descent = Math.max(descent, glyphDescent);
+        }
+        return descent;
+    }
+
+    private void drawBackgroundColor() {
+        if (!(text instanceof Spanned)) {
+            return;
+        }
+        Spanned spanned = (Spanned) text;
+    }
+
+    private void drawUnderline() {
+        if (!(text instanceof Spanned)) {
+            return;
+        }
+        Spanned spanned = (Spanned) text;
+        UnderlineSpan[] spans = spanned.getSpans(start, end, UnderlineSpan.class);
+        if (spans == null || spans.length == 0) {
+            return;
+        }
+        ArrayList<GSLayoutGlyph> glyphs = getGlyphs();
+        for (UnderlineSpan span : spans) {
+            int spanStart = Math.max(spanned.getSpanStart(span), start);
+            int spanEnd = Math.min(spanned.getSpanEnd(span), end);
+            if (spanStart >= spanEnd) {
+                continue;
+            }
+            LinkedList<GSLayoutGlyph> spanGlyphs = new LinkedList<>(glyphs.subList(spanStart, spanEnd));
+            GSLayoutGlyph first = spanGlyphs.getFirst();
+            GSLayoutGlyph last = spanGlyphs.getLast();
+            float start = vertical ? first.getUsedRect().top : first.getUsedRect().left;
+            float end = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
+            float ascent = getGlyphsMaxAscent(spanGlyphs, vertical);
+            float descent = getGlyphsMaxDescent(spanGlyphs, vertical);
+        }
+    }
+
+    private void drawStrikeThrough() {
+        if (!(text instanceof Spanned)) {
+            return;
+        }
+        Spanned spanned = (Spanned) text;
     }
 }

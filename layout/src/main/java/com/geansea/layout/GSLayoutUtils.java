@@ -1,5 +1,6 @@
 package com.geansea.layout;
 
+import android.graphics.Color;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.CharacterStyle;
@@ -62,6 +63,10 @@ final class GSLayoutUtils {
                 for (CharacterStyle span : spans) {
                     span.updateDrawState(spanPaint);
                 }
+                // Handle by self
+                spanPaint.bgColor = Color.TRANSPARENT;
+                spanPaint.setUnderlineText(false);
+                spanPaint.setStrikeThruText(false);
             }
             LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
             glyphs.addAll(spanGlyphs);

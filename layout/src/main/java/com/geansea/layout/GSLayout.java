@@ -184,10 +184,11 @@ public class GSLayout {
         float lineTop = 0;
         while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
-            PointF lineOrigin = line.getOrigin();
+            PointF origin = line.getOrigin();
             RectF lineRect = line.getUsedRect();
-            lineOrigin.y = lineTop - lineRect.top;
-            lineTop = lineOrigin.y + lineRect.bottom;
+            origin.y = lineTop - lineRect.top;
+            lineTop = origin.y + lineRect.bottom;
+            line.setOrigin(origin);
             if (lineTop > getHeight()) {
                 break;
             }
@@ -217,10 +218,11 @@ public class GSLayout {
         float lineRight = getWidth();
         while (lineLocation < getText().length()) {
             GSLayoutLine line = layoutLine(lineLocation);
-            PointF lineOrigin = line.getOrigin();
+            PointF origin = line.getOrigin();
             RectF lineRect = line.getUsedRect();
-            lineOrigin.x = lineRight - lineRect.right;
-            lineRight = lineOrigin.x + lineRect.left;
+            origin.x = lineRight - lineRect.right;
+            lineRight = origin.x + lineRect.left;
+            line.setOrigin(origin);
             if (lineRight < 0) {
                 break;
             }
@@ -260,11 +262,7 @@ public class GSLayout {
         glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
         adjustEndGlyphs(glyphs);
         PointF origin = adjustGlyphs(glyphs, text.length(), size);
-        if (builder.vertical) {
-            return GSLayoutLine.createVerticalLine(text, glyphs, origin);
-        } else {
-            return GSLayoutLine.createHorizontalLine(text, glyphs, origin);
-        }
+        return new GSLayoutLine(text, glyphs, origin, builder.vertical);
     }
 
     private void compressGlyphs(LinkedList<GSLayoutGlyph> glyphs) {

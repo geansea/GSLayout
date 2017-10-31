@@ -73,6 +73,10 @@ final class GSCharUtils {
         if (cannotLineBegin(glyph1)) {
             return false;
         }
+        // Not break sup/sub
+        if (glyph1.paint.baselineShift != 0) {
+            return false;
+        }
         char code0 = glyph0.code();
         char code1 = glyph1.code();
         // Always can break after space
