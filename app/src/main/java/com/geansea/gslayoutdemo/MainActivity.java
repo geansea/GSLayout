@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 "<font color='#0000FF'>蓝</font>" +
                 "上标<sup><small>123</small></sup>" +
                 "下标<sub><small>123</small></sub>" +
-                "<u>下划线</u>" +
+                "<u>下划线fog</u>" +
                 "</p>";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mTestSpannedText = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);

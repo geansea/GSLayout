@@ -91,10 +91,11 @@ final class GSLayoutUtils {
                 spanPaint = new TextPaint(paint);
                 for (CharacterStyle span : spans) {
                     span.updateDrawState(spanPaint);
-                    if (span instanceof MetricAffectingSpan) {
-                        ((MetricAffectingSpan) span).updateMeasureState(spanPaint);
-                    }
                 }
+                // Handle by self
+                spanPaint.bgColor = Color.TRANSPARENT;
+                spanPaint.setUnderlineText(false);
+                spanPaint.setStrikeThruText(false);
             }
             LinkedList<GSLayoutGlyph> spanGlyphs = getVerticalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
             glyphs.addAll(spanGlyphs);

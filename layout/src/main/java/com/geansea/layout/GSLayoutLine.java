@@ -1,6 +1,7 @@
 package com.geansea.layout;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.text.Spanned;
@@ -57,8 +58,8 @@ public class GSLayoutLine {
 
     public void draw(Canvas canvas) {
         // Decoration below text
-        drawBackgroundColor();
-        drawUnderline();
+        drawBackgroundColor(canvas);
+        drawUnderline(canvas);
         // Text
         for (GSLayoutGlyph glyph : glyphs) {
             float glyphX = Math.round(originX + glyph.getDrawX());
@@ -74,7 +75,7 @@ public class GSLayoutLine {
             }
         }
         // Decoration above text
-        drawStrikeThrough();
+        drawStrikeThrough(canvas);
     }
 
     GSLayoutLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin, boolean vertical) {
@@ -87,8 +88,8 @@ public class GSLayoutLine {
             this.glyphs = glyphs;
             originX = origin.x;
             originY = origin.y;
-            ascent = getGlyphsMaxAscent(glyphs, vertical);
-            descent = getGlyphsMaxDescent(glyphs, vertical);
+            ascent = GSLayoutHelper.getGlyphsMaxAscent(glyphs, vertical);
+            descent = GSLayoutHelper.getGlyphsMaxDescent(glyphs, vertical);
             size = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
             this.vertical = vertical;
         }
@@ -101,38 +102,14 @@ public class GSLayoutLine {
         return glyphs.getLast();
     }
 
-    private static float getGlyphsMaxAscent(LinkedList<GSLayoutGlyph> glyphs, boolean vertical) {
-        float ascent = 0;
-        if (glyphs == null || glyphs.size() == 0) {
-            return ascent;
-        }
-        for (GSLayoutGlyph glyph : glyphs) {
-            float glyphAscent = vertical ? glyph.getUsedRect().right : -glyph.getUsedRect().top;
-            ascent = Math.max(ascent, glyphAscent);
-        }
-        return ascent;
-    }
-
-    private static float getGlyphsMaxDescent(LinkedList<GSLayoutGlyph> glyphs, boolean vertical) {
-        float descent = 0;
-        if (glyphs == null || glyphs.size() == 0) {
-            return descent;
-        }
-        for (GSLayoutGlyph glyph : glyphs) {
-            float glyphDescent = vertical ? -glyph.getUsedRect().left : glyph.getUsedRect().bottom;
-            descent = Math.max(descent, glyphDescent);
-        }
-        return descent;
-    }
-
-    private void drawBackgroundColor() {
+    private void drawBackgroundColor(Canvas canvas) {
         if (!(text instanceof Spanned)) {
             return;
         }
         Spanned spanned = (Spanned) text;
     }
 
-    private void drawUnderline() {
+    private void drawUnderline(Canvas canvas) {
         if (!(text instanceof Spanned)) {
             return;
         }
@@ -141,54 +118,35 @@ public class GSLayoutLine {
         if (spans == null || spans.length == 0) {
             return;
         }
-        ArrayList<GSLayoutGlyph> glyphs = getGlyphs();
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2); // TODO
+        paint.setARGB(0xFF, 0, 0, 0); // TODO
         for (UnderlineSpan span : spans) {
-            int spanStart = Math.max(spanned.getSpanStart(span), start);
-            int spanEnd = Math.min(spanned.getSpanEnd(span), end);
-            if (spanStart >= spanEnd) {
+            RectF spanRect = getRect(span);
+            if (spanRect == null) {
                 continue;
             }
-            LinkedList<GSLayoutGlyph> spanGlyphs = new LinkedList<>(glyphs.subList(spanStart, spanEnd));
-            GSLayoutGlyph first = spanGlyphs.getFirst();
-            GSLayoutGlyph last = spanGlyphs.getLast();
-            float start = vertical ? first.getUsedRect().top : first.getUsedRect().left;
-            float end = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
-            float spanAscent = getGlyphsMaxAscent(spanGlyphs, vertical);
-            float spanDescent = getGlyphsMaxDescent(spanGlyphs, vertical);
-            RectF spanRect;
-            if (vertical) {
-                spanRect = new RectF(-descent, originY, ascent, originY + size);
-            } else {
-                spanRect = new RectF(first.getUsedRect().left, -ascent, last.getUsedRect().right, descent);
-            }
             spanRect.offset(originX, originY);
+            if (vertical) {
+                float lineX = spanRect.left;
+                canvas.drawLine(lineX, spanRect.top, lineX, spanRect.bottom, paint);
+            } else {
+                float lineY = (spanRect.bottom + originY) / 2;
+                canvas.drawLine(spanRect.left, lineY, spanRect.right, lineY, paint);
+            }
         }
     }
 
-    private void drawStrikeThrough() {
+    private void drawStrikeThrough(Canvas canvas) {
         if (!(text instanceof Spanned)) {
             return;
         }
         Spanned spanned = (Spanned) text;
     }
 
-    private int getGlyphIndexWithStart(int glyphStart) {
-        if (glyphStart < start || glyphStart >= end) {
-            return -1;
-        }
-        int glyphIndex = glyphStart - start;
-        return 0;
-    }
-
-    private int getGlyphIndexWithEnd(int glyphEnd) {
-        return getGlyphIndexWithStart(glyphEnd - 1);
-    }
-
-    private RectF getRect(int glyphStart, int glyphEnd) {
-        return null;
-    }
-
-    private RectF getRectGlyphs(CharacterStyle span) {
+    private RectF getRect(CharacterStyle span) {
         if (!(text instanceof Spanned)) {
             return null;
         }
@@ -198,9 +156,9 @@ public class GSLayoutLine {
         if (spanStart >= spanEnd) {
             return null;
         }
-        int glyphStart = spanStart;
-        int glyphEnd = spanEnd;
-        //return new LinkedList<>(glyphs.subList(glyphStart, glyphEnd));
-        return null;
+        ArrayList<GSLayoutGlyph> glyphs = getGlyphs();
+        int glyphStart = GSLayoutHelper.getGlyphIndexWithPosition(glyphs, spanStart);
+        int glyphEnd = GSLayoutHelper.getGlyphIndexWithPosition(glyphs, spanEnd - 1) + 1;
+        return GSLayoutHelper.getRect(glyphs, glyphStart, glyphEnd, vertical);
     }
 }
