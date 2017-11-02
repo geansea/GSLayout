@@ -46,10 +46,10 @@ final class GSLayoutUtils {
         return count;
     }
 
-    static LinkedList<GSLayoutGlyph> getGlyphs(CharSequence text, TextPaint paint, int start, int count, boolean verticsl, float pos) {
+    static LinkedList<GSLayoutGlyph> getGlyphs(CharSequence text, TextPaint paint, int start, int count, boolean vertical, float pos) {
         String string = text.toString();
         if (!(text instanceof Spanned)) {
-            if (verticsl) {
+            if (vertical) {
                 return getVerticalGlyphs(string, paint, start, count, pos);
             } else {
                 return getHorizontalGlyphs(string, paint, start, count, pos);
@@ -74,14 +74,14 @@ final class GSLayoutUtils {
                 spanPaint.setStrikeThruText(false);
             }
             LinkedList<GSLayoutGlyph> spanGlyphs;
-            if (verticsl) {
+            if (vertical) {
                 spanGlyphs = getVerticalGlyphs(string, spanPaint, spanStart, spanEnd - spanStart, pos);
             } else {
                 spanGlyphs = getHorizontalGlyphs(string, spanPaint, spanStart, spanEnd - spanStart, pos);
             }
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
-            pos = verticsl ? glyphs.getLast().getRect().bottom : glyphs.getLast().getRect().right;
+            pos = vertical ? glyphs.getLast().getRect().bottom : glyphs.getLast().getRect().right;
         }
         return glyphs;
     }
