@@ -81,7 +81,7 @@ final class GSLayoutUtils {
             }
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
-            pos = vertical ? glyphs.getLast().getRect().bottom : glyphs.getLast().getRect().right;
+            pos = glyphs.getLast().getEndSize();
         }
         return glyphs;
     }
