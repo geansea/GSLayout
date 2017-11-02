@@ -46,9 +46,14 @@ final class GSLayoutUtils {
         return count;
     }
 
-    static LinkedList<GSLayoutGlyph> getHorizontalGlyphs(CharSequence text, TextPaint paint, int start, int count, float x) {
+    static LinkedList<GSLayoutGlyph> getGlyphs(CharSequence text, TextPaint paint, int start, int count, boolean verticsl, float pos) {
+        String string = text.toString();
         if (!(text instanceof Spanned)) {
-            return getHorizontalGlyphs(text.toString(), paint, start, count, x);
+            if (verticsl) {
+                return getVerticalGlyphs(string, paint, start, count, pos);
+            } else {
+                return getHorizontalGlyphs(string, paint, start, count, pos);
+            }
         }
         Spanned spanned = (Spanned) text;
         LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
@@ -68,39 +73,15 @@ final class GSLayoutUtils {
                 spanPaint.setUnderlineText(false);
                 spanPaint.setStrikeThruText(false);
             }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getHorizontalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, x);
-            glyphs.addAll(spanGlyphs);
-            spanStart = spanEnd;
-            x = glyphs.getLast().getEndSize();
-        }
-        return glyphs;
-    }
-
-    static LinkedList<GSLayoutGlyph> getVerticalGlyphs(CharSequence text, TextPaint paint, int start, int count, float y) {
-        if (!(text instanceof Spanned)) {
-            return getVerticalGlyphs((String) text, paint, start, count, y);
-        }
-        Spanned spanned = (Spanned) text;
-        LinkedList<GSLayoutGlyph> glyphs = new LinkedList<>();
-        int spanStart = start;
-        while (spanStart < start + count) {
-            int spanEnd = spanned.nextSpanTransition(spanStart, start + count, CharacterStyle.class);
-            TextPaint spanPaint = paint;
-            CharacterStyle[] spans = spanned.getSpans(spanStart, spanEnd, CharacterStyle.class);
-            if (spans != null && spans.length > 0) {
-                spanPaint = new TextPaint(paint);
-                for (CharacterStyle span : spans) {
-                    span.updateDrawState(spanPaint);
-                }
-                // Handle by self
-                spanPaint.bgColor = Color.TRANSPARENT;
-                spanPaint.setUnderlineText(false);
-                spanPaint.setStrikeThruText(false);
+            LinkedList<GSLayoutGlyph> spanGlyphs;
+            if (verticsl) {
+                spanGlyphs = getVerticalGlyphs(string, spanPaint, spanStart, spanEnd - spanStart, pos);
+            } else {
+                spanGlyphs = getHorizontalGlyphs(string, spanPaint, spanStart, spanEnd - spanStart, pos);
             }
-            LinkedList<GSLayoutGlyph> spanGlyphs = getVerticalGlyphs(spanned.toString(), spanPaint, spanStart, spanEnd - spanStart, y);
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
-            y = glyphs.getLast().getEndSize();
+            pos = verticsl ? glyphs.getLast().getRect().bottom : glyphs.getLast().getRect().right;
         }
         return glyphs;
     }

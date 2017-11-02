@@ -251,12 +251,7 @@ public class GSLayout {
         }
         float size = builder.vertical ? getHeight() : getWidth();
         int count = GSLayoutUtils.breakText(text, builder.paint, start, getEnd(), (size - indent) * SIZE_EXTEND_TIMES);
-        LinkedList<GSLayoutGlyph> glyphs;
-        if (builder.vertical) {
-            glyphs = GSLayoutUtils.getVerticalGlyphs(text, builder.paint, start, count, indent);
-        } else {
-            glyphs = GSLayoutUtils.getHorizontalGlyphs(text, builder.paint, start, count, indent);
-        }
+        LinkedList<GSLayoutGlyph> glyphs = GSLayoutUtils.getGlyphs(text, builder.paint, start, count, builder.vertical, indent);
         compressGlyphs(glyphs);
         int breakPos = breakGlyphs(glyphs, size);
         glyphs = new LinkedList<>(glyphs.subList(0, breakPos));
