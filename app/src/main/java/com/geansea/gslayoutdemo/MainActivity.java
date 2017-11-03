@@ -8,7 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.TypefaceSpan;
 import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -118,21 +121,30 @@ public class MainActivity extends AppCompatActivity {
                 "习近平总书记代表十八届中央委员会向大会作报告。为更全面更深入地理解报告的内容，" +
                 "《中国访谈》节目组特别邀请中国人民大学高校哲学社会科学发展战略研究中心研究员韩宇博士对十九大报告进行解读。\n" +
                 "絵文字：\u2766\uD83D\uDC8C\uD83D\uDE02";
-        String html = "" +
-                "<p>" +
-                "<big>大</big>中<small>小</small>" +
-                "<b>加粗</b>" +
-                "<i>斜体</i>" +
-                "<font color='#FF0000'>红</font>" +
-                "<font color='#00FF00'>绿</font>" +
-                "<font color='#0000FF'>蓝</font>" +
-                "上标<sup><small>123</small></sup>" +
-                "下标<sub><small>123</small></sub>" +
-                "<u>下划线fog</u>" +
-                "</p>";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mTestSpannedText = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            int flag = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
+            builder.append("字号大", new RelativeSizeSpan(1.5f), flag);
+            builder.append("字号正常");
+            builder.append("字号小", new RelativeSizeSpan(0.6f), flag);
+
+            mTestSpannedText= builder;
         } else {
+            String html = "" +
+                    "<p>" +
+                    "<big>字号大</big>" +
+                    "字号正常" +
+                    "<small>字号小</small>" +
+                    "<b>加粗</b>" +
+                    "<i>斜体</i>" +
+                    "<font color='#FF0000'>红</font>" +
+                    "<font color='#00FF00'>绿</font>" +
+                    "<font color='#0000FF'>蓝</font>" +
+                    "上标<sup><small>123</small></sup>" +
+                    "下标<sub><small>123</small></sub>" +
+                    "<u>下划线fog</u>" +
+                    "</p>";
             // noinspection deprecation
             mTestSpannedText = Html.fromHtml(html);
         }
