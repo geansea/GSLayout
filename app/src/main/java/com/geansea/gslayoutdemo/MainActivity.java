@@ -1,17 +1,21 @@
 package com.geansea.gslayoutdemo;
 
+import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
-import android.text.style.TypefaceSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -122,32 +126,18 @@ public class MainActivity extends AppCompatActivity {
                 "《中国访谈》节目组特别邀请中国人民大学高校哲学社会科学发展战略研究中心研究员韩宇博士对十九大报告进行解读。\n" +
                 "絵文字：\u2766\uD83D\uDC8C\uD83D\uDE02";
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            SpannableStringBuilder builder = new SpannableStringBuilder();
-            int flag = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
-            builder.append("字号大", new RelativeSizeSpan(1.5f), flag);
-            builder.append("字号正常");
-            builder.append("字号小", new RelativeSizeSpan(0.6f), flag);
-
-            mTestSpannedText= builder;
-        } else {
-            String html = "" +
-                    "<p>" +
-                    "<big>字号大</big>" +
-                    "字号正常" +
-                    "<small>字号小</small>" +
-                    "<b>加粗</b>" +
-                    "<i>斜体</i>" +
-                    "<font color='#FF0000'>红</font>" +
-                    "<font color='#00FF00'>绿</font>" +
-                    "<font color='#0000FF'>蓝</font>" +
-                    "上标<sup><small>123</small></sup>" +
-                    "下标<sub><small>123</small></sub>" +
-                    "<u>下划线fog</u>" +
-                    "</p>";
-            // noinspection deprecation
-            mTestSpannedText = Html.fromHtml(html);
-        }
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        appendSpanned(builder, "字号大big", new RelativeSizeSpan(1.5f));
+        appendSpanned(builder, "字号正常normal", null);
+        appendSpanned(builder, "字号小small", new RelativeSizeSpan(0.6f));
+        appendSpanned(builder, "加粗bold", new StyleSpan(Typeface.BOLD));
+        appendSpanned(builder, "斜体italic", new StyleSpan(Typeface.ITALIC));
+        appendSpanned(builder, "颜色foreground color", new ForegroundColorSpan(Color.BLUE));
+        appendSpanned(builder, "背景色background color", new BackgroundColorSpan(Color.YELLOW));
+        appendSpanned(builder, "下划线underline", new UnderlineSpan());
+        appendSpanned(builder, "删除线strike through", new StrikethroughSpan());
+        appendSpanned(builder, "阴影shadow", new GSShadowSpan());
+        mTestSpannedText = builder;
 
         mSystemFont = Typeface.DEFAULT;
         mSourceHanSansFont = Typeface.createFromAsset(getAssets(), "fonts/SourceHanSansSC-Light.otf");
@@ -177,5 +167,13 @@ public class MainActivity extends AppCompatActivity {
         mFontSizeGroup = (RadioGroup) findViewById(R.id.font_size_group);
         mFontSizeGroup.setOnCheckedChangeListener(mOnRadioCheckedChangeListener);
         mFontSizeGroup.check(R.id.font_size_middle);
+    }
+
+    private static void appendSpanned(SpannableStringBuilder builder, String text, CharacterStyle span) {
+        int start = builder.length();
+        builder.append(text);
+        if (span != null) {
+            builder.setSpan(span, start, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 }

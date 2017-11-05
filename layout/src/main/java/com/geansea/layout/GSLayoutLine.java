@@ -5,7 +5,9 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
+import android.text.style.StrikethroughSpan;
 import android.text.style.UnderlineSpan;
 
 import java.util.ArrayList;
@@ -107,6 +109,22 @@ public class GSLayoutLine {
             return;
         }
         Spanned spanned = (Spanned) text;
+        BackgroundColorSpan[] spans = spanned.getSpans(start, end, BackgroundColorSpan.class);
+        if (spans == null || spans.length == 0) {
+            return;
+        }
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL);
+        for (BackgroundColorSpan span : spans) {
+            RectF spanRect = getRect(span);
+            if (spanRect == null) {
+                continue;
+            }
+            spanRect.offset(originX, originY);
+            paint.setColor(span.getBackgroundColor());
+            canvas.drawRect(spanRect, paint);
+        }
     }
 
     private void drawUnderline(Canvas canvas) {
@@ -144,6 +162,29 @@ public class GSLayoutLine {
             return;
         }
         Spanned spanned = (Spanned) text;
+        StrikethroughSpan[] spans = spanned.getSpans(start, end, StrikethroughSpan.class);
+        if (spans == null || spans.length == 0) {
+            return;
+        }
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2); // TODO
+        paint.setARGB(0xFF, 0, 0, 0); // TODO
+        for (StrikethroughSpan span : spans) {
+            RectF spanRect = getRect(span);
+            if (spanRect == null) {
+                continue;
+            }
+            spanRect.offset(originX, originY);
+            if (vertical) {
+                float lineX = (spanRect.left + spanRect.right) / 2;
+                canvas.drawLine(lineX, spanRect.top, lineX, spanRect.bottom, paint);
+            } else {
+                float lineY = (spanRect.top + spanRect.bottom + originY) / 3;
+                canvas.drawLine(spanRect.left, lineY, spanRect.right, lineY, paint);
+            }
+        }
     }
 
     private RectF getRect(CharacterStyle span) {
