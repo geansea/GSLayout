@@ -1,5 +1,6 @@
 package com.geansea.gslayoutdemo;
 
+import android.graphics.BlurMaskFilter;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -9,12 +10,16 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.MaskFilterSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
 import android.text.style.UnderlineSpan;
 import android.view.MenuItem;
 import android.widget.CheckBox;
@@ -136,7 +141,36 @@ public class MainActivity extends AppCompatActivity {
         appendSpanned(builder, "背景色background color", new BackgroundColorSpan(Color.YELLOW));
         appendSpanned(builder, "下划线underline", new UnderlineSpan());
         appendSpanned(builder, "删除线strike through", new StrikethroughSpan());
-        appendSpanned(builder, "阴影shadow", new GSShadowSpan(2, 2, 2, Color.BLUE));
+        appendSpanned(builder, "模糊blur", new MaskFilterSpan(new BlurMaskFilter(4, BlurMaskFilter.Blur.NORMAL)));
+        appendSpanned(builder, "下标", null);
+        appendSpanned(builder, "sub", new SubscriptSpan() {
+            @Override
+            public void updateDrawState(TextPaint tp) {
+                tp.baselineShift += (int) (tp.descent() / 2);
+                tp.setTextSize(tp.getTextSize() / 2);
+            }
+
+            @Override
+            public void updateMeasureState(TextPaint tp) {
+                tp.baselineShift += (int) (tp.descent() / 2);
+                tp.setTextSize(tp.getTextSize() / 2);
+            }
+        });
+        appendSpanned(builder, "上标", null);
+        appendSpanned(builder, "sup", new SuperscriptSpan() {
+            @Override
+            public void updateDrawState(TextPaint tp) {
+                tp.baselineShift += (int) (tp.ascent() / 2);
+                tp.setTextSize(tp.getTextSize() / 2);
+            }
+
+            @Override
+            public void updateMeasureState(TextPaint tp) {
+                tp.baselineShift += (int) (tp.ascent() / 2);
+                tp.setTextSize(tp.getTextSize() / 2);
+            }
+        });
+        appendSpanned(builder, "阴影shadow", new GSShadowSpan(4, 2, 2, Color.BLUE));
         mTestSpannedText = builder;
 
         mSystemFont = Typeface.DEFAULT;
