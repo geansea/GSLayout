@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         appendSpanned(builder, "背景色background color", new BackgroundColorSpan(Color.YELLOW));
         appendSpanned(builder, "下划线underline", new UnderlineSpan());
         appendSpanned(builder, "删除线strike through", new StrikethroughSpan());
-        appendSpanned(builder, "阴影shadow", new GSShadowSpan());
+        appendSpanned(builder, "阴影shadow", new GSShadowSpan(2, 2, 2, Color.BLUE));
         mTestSpannedText = builder;
 
         mSystemFont = Typeface.DEFAULT;
