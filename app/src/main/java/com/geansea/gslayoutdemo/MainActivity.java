@@ -146,13 +146,13 @@ public class MainActivity extends AppCompatActivity {
         appendSpanned(builder, "sub", new SubscriptSpan() {
             @Override
             public void updateDrawState(TextPaint tp) {
-                tp.baselineShift += (int) (tp.descent() / 2);
+                tp.baselineShift += (int) (tp.getTextSize() / 3);
                 tp.setTextSize(tp.getTextSize() / 2);
             }
 
             @Override
             public void updateMeasureState(TextPaint tp) {
-                tp.baselineShift += (int) (tp.descent() / 2);
+                tp.baselineShift += (int) (tp.getTextSize() / 3);
                 tp.setTextSize(tp.getTextSize() / 2);
             }
         });
@@ -160,13 +160,13 @@ public class MainActivity extends AppCompatActivity {
         appendSpanned(builder, "sup", new SuperscriptSpan() {
             @Override
             public void updateDrawState(TextPaint tp) {
-                tp.baselineShift += (int) (tp.ascent() / 2);
+                tp.baselineShift -= (int) (tp.getTextSize() / 2);
                 tp.setTextSize(tp.getTextSize() / 2);
             }
 
             @Override
             public void updateMeasureState(TextPaint tp) {
-                tp.baselineShift += (int) (tp.ascent() / 2);
+                tp.baselineShift -= (int) (tp.getTextSize() / 2);
                 tp.setTextSize(tp.getTextSize() / 2);
             }
         });

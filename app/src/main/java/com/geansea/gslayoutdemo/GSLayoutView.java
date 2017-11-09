@@ -32,6 +32,8 @@ class GSLayoutView extends View {
                 .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                 .setLineSpacing(0.2f)
                 .setParagraphSpacing(0.2f);
+        // Disable hardware acceleration for this view
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     }
 
     public void setText(CharSequence text) {
@@ -76,6 +78,7 @@ class GSLayoutView extends View {
         } else {
             lines = layoutLines(getWidth(), getHeight(), 0);
         }
+        invalidate();
     }
 
     @Override
