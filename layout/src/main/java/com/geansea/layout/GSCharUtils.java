@@ -139,8 +139,7 @@ final class GSCharUtils {
         return textBuilder.toString();
     }
 
-    private static final HashSet<Character> compressStartSet
-            = new HashSet<>(Arrays.asList(new Character[]{
+    private static final HashSet<Character> compressStartSet = new HashSet<>(Arrays.asList(
             '\u2018', // ‘
             '\u201C', // “
             '\u3008', // 〈
@@ -153,10 +152,10 @@ final class GSCharUtils {
             '\uFF08', // （
             '\uFF3B', // ［
             '\uFF5B', // ｛
-    }));
+            Character.MIN_VALUE
+    ));
 
-    private static final HashSet<Character> compressEndSet
-            = new HashSet<>(Arrays.asList(new Character[]{
+    private static final HashSet<Character> compressEndSet = new HashSet<>(Arrays.asList(
             '\u2019', // ’
             '\u201D', // ”
             '\u3001', // 、
@@ -184,10 +183,10 @@ final class GSCharUtils {
             '\uFE14', // ；
             '\uFE15', // ！
             '\uFE16', // ？
-    }));
+            Character.MIN_VALUE
+    ));
 
-    private static final HashSet<Character> notLineBeginSet
-            = new HashSet<>(Arrays.asList(new Character[]{
+    private static final HashSet<Character> notLineBeginSet = new HashSet<>(Arrays.asList(
             '!',
             ')',
             ',',
@@ -198,18 +197,18 @@ final class GSCharUtils {
             '?',
             ']',
             '}',
-    }));
+            Character.MIN_VALUE
+    ));
 
-    private static final HashSet<Character> notLineEndSet
-            = new HashSet<>(Arrays.asList(new Character[]{
+    private static final HashSet<Character> notLineEndSet = new HashSet<>(Arrays.asList(
             '(',
             '<',
             '[',
             '{',
-    }));
+            Character.MIN_VALUE
+    ));
 
-    private static final HashSet<Character> rotateForVerticalSet
-            = new HashSet<>(Arrays.asList(new Character[]{
+    private static final HashSet<Character> rotateForVerticalSet = new HashSet<>(Arrays.asList(
             '\u2014', // —
             '\u2026', // …
             '\u3008', // 〈
@@ -232,10 +231,10 @@ final class GSCharUtils {
             '\uFF3D', // ］
             '\uFF5B', // ｛
             '\uFF5D', // ｝
-    }));
+            Character.MIN_VALUE
+    ));
 
-    private static final HashMap<Character, Character> replaceForVerticalMap
-            = new HashMap<Character, Character>() {{
+    private static final HashMap<Character, Character> replaceForVerticalMap = new HashMap<Character, Character>() {{
         put('\uFF0C', '\uFE10'); // ，
         put('\u3001', '\uFE11'); // 、
         put('\u3002', '\uFE12'); // 。

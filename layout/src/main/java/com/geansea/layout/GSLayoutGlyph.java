@@ -63,7 +63,7 @@ public class GSLayoutGlyph {
         return vertical ? getUsedRect().bottom : getUsedRect().right;
     }
 
-    RectF getRect() {
+    private RectF getRect() {
         RectF rect;
         if (rotateForVertical) {
             rect = new RectF(-descent, 0, ascent, size);

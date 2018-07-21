@@ -177,28 +177,28 @@ public class MainActivity extends AppCompatActivity {
         mSourceHanSansFont = Typeface.createFromAsset(getAssets(), "fonts/SourceHanSansSC-Light.otf");
         mSourceHanSerifFont = Typeface.createFromAsset(getAssets(), "fonts/SourceHanSerifCN-Light.otf");
 
-        mLayoutView = (GSLayoutView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        mLayoutView = findViewById(R.id.message);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.navigation_pure_text);
 
-        mHelpingLineCheckBox = (CheckBox) findViewById(R.id.helping_line);
+        mHelpingLineCheckBox = findViewById(R.id.helping_line);
         mHelpingLineCheckBox.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mHelpingLineCheckBox.setChecked(true);
 
-        mVerticalCheckBox = (CheckBox) findViewById(R.id.vertical_layout);
+        mVerticalCheckBox = findViewById(R.id.vertical_layout);
         mVerticalCheckBox.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mVerticalCheckBox.setChecked(false);
 
-        mPunctuationCompressCheckBox = (CheckBox) findViewById(R.id.punctuation_compress);
+        mPunctuationCompressCheckBox = findViewById(R.id.punctuation_compress);
         mPunctuationCompressCheckBox.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mPunctuationCompressCheckBox.setChecked(true);
 
-        mFontGroup = (RadioGroup) findViewById(R.id.font_group);
+        mFontGroup = findViewById(R.id.font_group);
         mFontGroup.setOnCheckedChangeListener(mOnRadioCheckedChangeListener);
         mFontGroup.check(R.id.source_han_sans_font);
 
-        mFontSizeGroup = (RadioGroup) findViewById(R.id.font_size_group);
+        mFontSizeGroup = findViewById(R.id.font_size_group);
         mFontSizeGroup.setOnCheckedChangeListener(mOnRadioCheckedChangeListener);
         mFontSizeGroup.check(R.id.font_size_middle);
     }
