@@ -4,16 +4,16 @@
     <item
         android:id="@+id/navigation_pure_text"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_pure_text" />
+        android:title="@string/nav_title_pure_text" />
 
     <item
         android:id="@+id/navigation_rich_text"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_rich_text" />
+        android:title="@string/nav_title_rich_text" />
 
     <item
-        android:id="@+id/navigation_complex_area"
+        android:id="@+id/navigation_poster"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_complex_area" />
+        android:title="@string/nav_title_poster" />
 
 </menu>

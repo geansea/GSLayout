@@ -14,20 +14,19 @@ import com.geansea.layout.GSLayout;
 import com.geansea.layout.GSLayoutGlyph;
 import com.geansea.layout.GSLayoutLine;
 
-import java.util.ArrayList;
+import java.util.List;
 
 class GSLayoutView extends View {
-    private GSLayout.Builder builder;
-    private CharSequence text;
-    private boolean complexMode;
-    private ArrayList<GSLayoutLine> lines;
-    private boolean drawHelpingLine;
+    private GSLayout.Builder mBuilder;
+    private CharSequence mText;
+    private GSLayout mLayout;
+    private boolean mDrawHelpingLine;
 
     public GSLayoutView(Context context, AttributeSet attrs) {
         super(context, attrs);
         TextPaint paint = new TextPaint();
         paint.setAntiAlias(true);
-        builder = GSLayout.Builder.obtain(paint)
+        mBuilder = GSLayout.Builder.obtain(paint)
                 .setIndent(2)
                 .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
                 .setLineSpacing(0.2f)
@@ -37,79 +36,66 @@ class GSLayoutView extends View {
     }
 
     public void setText(CharSequence text) {
-        this.text = text;
-        requestLayout();
-    }
-
-    public void setComplexMode(boolean complexMode) {
-        this.complexMode = complexMode;
+        mText = text;
         requestLayout();
     }
 
     public void setTypeface(Typeface typeface) {
-        builder.setTypeface(typeface);
+        mBuilder.setTypeface(typeface);
         requestLayout();
     }
 
     public void setFontSize(float fontSize) {
-        builder.setFontSize(fontSize);
+        mBuilder.setFontSize(fontSize);
         requestLayout();
     }
 
     public void setPunctuationCompressRate(float punctuationCompressRate) {
-        builder.setPunctuationCompressRate(punctuationCompressRate);
+        mBuilder.setPunctuationCompressRate(punctuationCompressRate);
         requestLayout();
     }
 
     public void setVertical(boolean vertical) {
-        builder.setVertical(vertical);
+        mBuilder.setVertical(vertical);
         requestLayout();
     }
 
     public void setDrawHelpingLine(boolean drawHelpingLine) {
-        this.drawHelpingLine = drawHelpingLine;
+        mDrawHelpingLine = drawHelpingLine;
         invalidate();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (complexMode) {
-            lines = layoutComplexLines(getWidth(), getHeight());
-        } else {
-            lines = layoutLines(getWidth(), getHeight(), 0);
-        }
+        mBuilder.setWidth(getWidth()).setHeight(getHeight());
+        mLayout = mBuilder.build(mText, 0, mText.length());
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (lines == null || lines.size() == 0) {
+        if (mLayout == null) {
             return;
         }
-        for (GSLayoutLine line : lines) {
-            line.draw(canvas);
-        }
-        if (drawHelpingLine) {
+        mLayout.draw(canvas);
+        if (mDrawHelpingLine) {
             drawHelpingLines(canvas);
         }
     }
 
-    private ArrayList<GSLayoutLine> layoutLines(int width, int height, int start) {
-        builder.setWidth(width).setHeight(height);
-        GSLayout layout = builder.build(text, start, text.length());
-        return layout != null ? layout.getLines() : null;
-    }
-
-    private ArrayList<GSLayoutLine> layoutComplexLines(int width, int height) {
-        return null;
-    }
-
     private void drawHelpingLines(Canvas canvas) {
+        if (mLayout == null) {
+            return;
+        }
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
+        // Frame
+        paint.setARGB(0x80, 0xFF, 0, 0);
+        canvas.drawRect(mLayout.getUsedRect(), paint);
         // Lines
+        List<GSLayoutLine> lines = mLayout.getLines();
         paint.setARGB(0x80, 0, 0xFF, 0);
         for (GSLayoutLine line : lines) {
             canvas.drawRect(line.getUsedRect(), paint);

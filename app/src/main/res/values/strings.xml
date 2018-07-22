@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">GSLayout 排版效果 Demo</string>
-    <string name="title_pure_text">纯文本</string>
-    <string name="title_rich_text">富文本</string>
-    <string name="title_complex_area">复杂区域</string>
+    <string name="nav_title_pure_text">纯文本</string>
+    <string name="nav_title_rich_text">富文本</string>
+    <string name="nav_title_poster">海报</string>
     <string name="helping_line">辅助线</string>
     <string name="vertical_layout">竖排版</string>
     <string name="punctuation_compress">标点压缩</string>
@@ -14,4 +14,7 @@
     <string name="font_size_middle">中</string>
     <string name="font_size_large">大</string>
     <string name="font_size_largest">最大</string>
+    <string name="config_1">配置1</string>
+    <string name="config_2">配置2</string>
+    <string name="config_3">配置3</string>
 </resources>
