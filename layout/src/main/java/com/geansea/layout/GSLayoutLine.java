@@ -24,6 +24,7 @@ public class GSLayoutLine {
     private float descent;
     private float size;
     private boolean vertical;
+    private boolean isParaEnd;
 
     public CharSequence getText() {
         return text;
@@ -80,7 +81,7 @@ public class GSLayoutLine {
         drawStrikeThrough(canvas);
     }
 
-    GSLayoutLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin, boolean vertical) {
+    GSLayoutLine(CharSequence text, LinkedList<GSLayoutGlyph> glyphs, PointF origin, boolean vertical, boolean isParaEnd) {
         if (glyphs.size() > 0) {
             GSLayoutGlyph first = glyphs.getFirst();
             GSLayoutGlyph last = glyphs.getLast();
@@ -94,14 +95,12 @@ public class GSLayoutLine {
             descent = GSLayoutHelper.getGlyphsMaxDescent(glyphs, vertical);
             size = vertical ? last.getUsedRect().bottom : last.getUsedRect().right;
             this.vertical = vertical;
+            this.isParaEnd = isParaEnd;
         }
     }
 
-    GSLayoutGlyph getLastGlyph() {
-        if (glyphs == null || glyphs.size() == 0) {
-            return null;
-        }
-        return glyphs.getLast();
+    boolean isParaEnd() {
+        return isParaEnd;
     }
 
     private void drawBackgroundColor(Canvas canvas) {

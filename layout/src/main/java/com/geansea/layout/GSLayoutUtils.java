@@ -37,9 +37,9 @@ final class GSLayoutUtils {
         } else {
             count = paint.breakText(text.toString(), start, end, true, size, null);
         }
-        for (int pos = start; pos < Math.min(start + count + 1, end); ++pos) {
-            if (GSCharUtils.isNewline(text.charAt(pos))) {
-                count = pos - start + 1;
+        for (int index = start; index < Math.min(start + count + 1, end); ++index) {
+            if (GSCharUtils.isNewline(text.charAt(index))) {
+                count = index - start + 1;
                 break;
             }
         }
@@ -81,7 +81,7 @@ final class GSLayoutUtils {
             }
             glyphs.addAll(spanGlyphs);
             spanStart = spanEnd;
-            pos = glyphs.getLast().getEndSize();
+            pos = glyphs.getLast().getEndPos();
         }
         return glyphs;
     }

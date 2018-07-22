@@ -67,8 +67,8 @@ class GSLayoutView extends View {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mBuilder.setWidth(getWidth()).setHeight(getHeight());
-        mLayout = mBuilder.build(mText, 0, mText.length());
+        mBuilder.setRect(0, 0, getWidth(), getHeight());
+        mLayout = mBuilder.build(mText);
         invalidate();
     }
 

@@ -55,11 +55,11 @@ public class GSLayoutGlyph {
         return (!vertical || rotateForVertical) && paint.getTypeface().isItalic();
     }
 
-    float getEndSize() {
+    float getEndPos() {
         return vertical ? getRect().bottom : getRect().right;
     }
 
-    float getUsedEndSize() {
+    float getUsedEndPos() {
         return vertical ? getUsedRect().bottom : getUsedRect().right;
     }
 

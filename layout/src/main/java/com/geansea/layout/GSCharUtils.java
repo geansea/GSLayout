@@ -10,6 +10,10 @@ final class GSCharUtils {
         return code == '\r' || code == '\n';
     }
 
+    static boolean isNewline(GSLayoutGlyph glyph) {
+        return glyph != null && isNewline(glyph.code());
+    }
+
     static boolean isVerticalPunctuation(char code) {
         return ('\uFE10' <= code && code <= '\uFE16');
     }

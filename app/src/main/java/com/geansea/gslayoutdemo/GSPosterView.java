@@ -78,19 +78,15 @@ class GSPosterView extends android.support.v7.widget.AppCompatImageView {
             paint.setTypeface(Typeface.DEFAULT);
             paint.setColor(textColor);
             GSLayout.Builder builder = GSLayout.Builder.obtain(paint)
-                    .setWidth(frame.width())
-                    .setHeight(frame.height())
+                    .setRect(frame)
                     .setVertical(vertical)
                     .setFontSize(fontSize)
                     .setAlignment(textAlign)
                     .setLineSpacing(0.3f)
                     .setParagraphSpacing(0.3f);
-            GSLayout layout = builder.build(text, 0, text.length());
+            GSLayout layout = builder.build(text);
             if (layout != null) {
-                canvas.save();
-                canvas.translate(frame.left, frame.top);
                 layout.draw(canvas);
-                canvas.restore();
             }
         }
     }
