@@ -21,6 +21,7 @@ public class GSLayout {
         private final TextPaint paint;
         private int width;
         private int height;
+        private int maxLineCount;
         private float indent;
         private float punctuationCompressRate;
         private Alignment alignment;
@@ -49,6 +50,11 @@ public class GSLayout {
 
         public Builder setHeight(int height) {
             this.height = height;
+            return this;
+        }
+
+        public Builder setMaxLineCount(int maxLineCount) {
+            this.maxLineCount = maxLineCount;
             return this;
         }
 
@@ -179,23 +185,26 @@ public class GSLayout {
     private void doHorizontalLayout() {
         LinkedList<GSLayoutLine> lines = new LinkedList<>();
         float fontSize = builder.getFontSize();
-        int lineLocation = getStart();
+        int lineLocation = start;
         float maxWidth = 0;
         float lineTop = 0;
-        while (lineLocation < getText().length()) {
+        while (lineLocation < text.length()) {
             GSLayoutLine line = layoutLine(lineLocation);
             PointF origin = line.getOrigin();
             RectF lineRect = line.getUsedRect();
             origin.y = lineTop - lineRect.top;
-            lineTop = origin.y + lineRect.bottom;
             line.setOrigin(origin);
-            if (lineTop > getHeight()) {
+            float lineBottom = origin.y + lineRect.bottom;
+            if (lineBottom > builder.height) {
                 break;
             }
             lines.add(line);
-            lineLocation = line.getEnd();
             maxWidth = Math.max(maxWidth, lineRect.width());
-            lineTop += fontSize * builder.lineSpacing;
+            if (builder.maxLineCount > 0 && lines.size() >= builder.maxLineCount) {
+                break;
+            }
+            lineLocation = line.getEnd();
+            lineTop = lineBottom + fontSize * builder.lineSpacing;
             if (GSCharUtils.isNewline(line.getLastGlyph().code())) {
                 lineTop += fontSize * builder.paragraphSpacing;
             }
@@ -213,23 +222,26 @@ public class GSLayout {
     private void doVerticalLayout() {
         LinkedList<GSLayoutLine> lines = new LinkedList<>();
         float fontSize = builder.getFontSize();
-        int lineLocation = getStart();
+        int lineLocation = start;
         float maxHeight = 0;
-        float lineRight = getWidth();
-        while (lineLocation < getText().length()) {
+        float lineRight = builder.width;
+        while (lineLocation < text.length()) {
             GSLayoutLine line = layoutLine(lineLocation);
             PointF origin = line.getOrigin();
             RectF lineRect = line.getUsedRect();
             origin.x = lineRight - lineRect.right;
-            lineRight = origin.x + lineRect.left;
             line.setOrigin(origin);
-            if (lineRight < 0) {
+            float lineLeft = origin.x + lineRect.left;
+            if (lineLeft < 0) {
                 break;
             }
             lines.add(line);
-            lineLocation = line.getEnd();
             maxHeight = Math.max(maxHeight, lineRect.height());
-            lineRight -= fontSize * builder.lineSpacing;
+            if (builder.maxLineCount > 0 && lines.size() > builder.maxLineCount) {
+                break;
+            }
+            lineLocation = line.getEnd();
+            lineRight = lineLeft - fontSize * builder.lineSpacing;
             if (GSCharUtils.isNewline(line.getLastGlyph().code())) {
                 lineRight -= fontSize * builder.paragraphSpacing;
             }
