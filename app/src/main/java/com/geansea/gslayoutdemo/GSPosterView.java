@@ -81,7 +81,7 @@ class GSPosterView extends android.support.v7.widget.AppCompatImageView {
                     .setRect(frame)
                     .setVertical(vertical)
                     .setFontSize(fontSize)
-                    .setAlignment(textAlign)
+                    .setTextAlignment(textAlign, textAlign)
                     .setLineSpacing(0.3f)
                     .setParagraphSpacing(0.3f);
             GSLayout layout = builder.build(text);

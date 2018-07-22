@@ -28,7 +28,7 @@ class GSLayoutView extends View {
         paint.setAntiAlias(true);
         mBuilder = GSLayout.Builder.obtain(paint)
                 .setIndent(2)
-                .setAlignment(GSLayout.Alignment.ALIGN_JUSTIFY)
+                .setTextAlignment(GSLayout.Alignment.ALIGN_JUSTIFY, GSLayout.Alignment.ALIGN_NORMAL)
                 .setLineSpacing(0.2f)
                 .setParagraphSpacing(0.2f);
         // Disable hardware acceleration for this view
