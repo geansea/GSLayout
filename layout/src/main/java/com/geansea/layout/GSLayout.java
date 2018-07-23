@@ -435,8 +435,32 @@ public class GSLayout {
 
     private RectF adjustLines() {
         RectF lastLineRect = lines.getLast().getUsedRect();
-        float adjustSize = builder.vertical ? lastLineRect.left - builder.rect.left : builder.rect.bottom - lastLineRect.bottom;
+        float adjustSize = builder.vertical ? (lastLineRect.left - builder.rect.left) : (builder.rect.bottom - lastLineRect.bottom);
         if (adjustSize > 0) {
+            float move = 0;
+            switch (builder.lineAlignment) {
+                case ALIGN_NORMAL:
+                    break;
+                case ALIGN_OPPOSITE:
+                    move += adjustSize;
+                    break;
+                case ALIGN_CENTER:
+                    move += adjustSize / 2;
+                    break;
+                case ALIGN_JUSTIFY:
+                    break;
+                default:
+                    break;
+            }
+            for (GSLayoutLine line : lines) {
+                PointF origin = line.getOrigin();
+                if (builder.vertical) {
+                    origin.x -= move;
+                } else {
+                    origin.y += move;
+                }
+                line.setOrigin(origin);
+            }
         }
         RectF rect = null;
         for (GSLayoutLine line : lines) {

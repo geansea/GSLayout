@@ -39,6 +39,7 @@ class GSPosterView extends android.support.v7.widget.AppCompatImageView {
         private final Rect frame;
         boolean vertical;
         GSLayout.Alignment textAlign;
+        GSLayout.Alignment lineAlign;
         float fontSize;
         int textColor;
 
@@ -66,6 +67,21 @@ class GSPosterView extends android.support.v7.widget.AppCompatImageView {
                     textAlign = GSLayout.Alignment.ALIGN_NORMAL;
             }
 
+            align = json.getString("line-align");
+            switch (align) {
+                case "start":
+                    lineAlign = GSLayout.Alignment.ALIGN_NORMAL;
+                    break;
+                case "center":
+                    lineAlign = GSLayout.Alignment.ALIGN_CENTER;
+                    break;
+                case "end":
+                    lineAlign = GSLayout.Alignment.ALIGN_OPPOSITE;
+                    break;
+                default:
+                    lineAlign = GSLayout.Alignment.ALIGN_NORMAL;
+            }
+
             fontSize = json.getInt("size");
 
             String color = json.getString("color");
@@ -82,6 +98,7 @@ class GSPosterView extends android.support.v7.widget.AppCompatImageView {
                     .setVertical(vertical)
                     .setFontSize(fontSize)
                     .setTextAlignment(textAlign, textAlign)
+                    .setLineAlignment(lineAlign)
                     .setLineSpacing(0.3f)
                     .setParagraphSpacing(0.3f);
             GSLayout layout = builder.build(text);

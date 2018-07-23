@@ -67,16 +67,18 @@ public class PosterFragment extends Fragment {
                         "\"b\": 640," +
                         "\"vertical\": 0," +
                         "\"align\": \"start\"," +
+                        "\"line-align\": \"center\"," +
                         "\"size\": 48," +
                         "\"color\": \"#1F3134\"" +
                     "}," +
                     "\"author\": {" +
                         "\"l\": 60," +
                         "\"r\": 660," +
-                        "\"t\": 640," +
+                        "\"t\": 660," +
                         "\"b\": 700," +
                         "\"vertical\": 0," +
                         "\"align\": \"end\"," +
+                        "\"line-align\": \"start\"," +
                         "\"size\": 40," +
                         "\"color\": \"#5A544B\"" +
                     "}" +
@@ -98,6 +100,7 @@ public class PosterFragment extends Fragment {
                         "\"b\": 1100," +
                         "\"vertical\": 1," +
                         "\"align\": \"start\"," +
+                        "\"line-align\": \"start\"," +
                         "\"size\": 48," +
                         "\"color\": \"#0D0015\"" +
                     "}," +
@@ -108,6 +111,7 @@ public class PosterFragment extends Fragment {
                         "\"b\": 1100," +
                         "\"vertical\": 1," +
                         "\"align\": \"end\"," +
+                        "\"line-align\": \"center\"," +
                         "\"size\": 40," +
                         "\"color\": \"#2B2B2B\"" +
                     "}" +
@@ -130,16 +134,18 @@ public class PosterFragment extends Fragment {
                         "\"b\": 640," +
                         "\"vertical\": 0," +
                         "\"align\": \"center\"," +
+                        "\"line-align\": \"center\"," +
                         "\"size\": 48," +
                         "\"color\": \"#EAF4FC\"" +
                     "}," +
                     "\"author\": {" +
-                        "\"l\": 330," +
-                        "\"r\": 390," +
+                        "\"l\": 60," +
+                        "\"r\": 660," +
                         "\"t\": 640," +
                         "\"b\": 1220," +
                         "\"vertical\": 1," +
                         "\"align\": \"end\"," +
+                        "\"line-align\": \"center\"," +
                         "\"size\": 40," +
                         "\"color\": \"#F8F4E6\"" +
                     "}" +
